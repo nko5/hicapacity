@@ -1,8 +1,10 @@
+var crypto = require("crypto");
 var express = require('express');
 var passport = require('passport');
 var OAuth2Strategy= require('passport-oauth2').Strategy;
 var mongoose = require('mongoose');
 var User = require("./models/users.js");
+var RegistrationToken = require("./models/registration_tokens.js");
 var app = express();
 var todoist = require("./todoist.js");
 
@@ -18,14 +20,10 @@ mongoose.set('debug', true);
 
 
 passport.serializeUser(function(user, done) {
-  console.log("Serializing user: " + user._id);
-  console.log(user);
-  console.log(done);
   done(null, user._id);
 });
 
 passport.deserializeUser(function(id, done) {
-  console.log("Deserializing user: " + id);
   User.findById(id, function(err, user) {
     done(err, user);
   });
@@ -43,7 +41,7 @@ passport.use(new OAuth2Strategy({
   function(request, accessToken, refreshToken, profile, done) {
     var slack_id = request.session.slack_id;
     User.findOneAndUpdate({slack_id: slack_id}, {todoist_oauth_token: accessToken}, { upsert: true, 'new': true}, function(err, user) {
-      if (err) {}
+      if (err) { console.error('Finding / Updating User error: ' + err); }
       return done(err, user);
     });
   }
@@ -63,41 +61,57 @@ app.post('/slash', function(req, res) {
   var slack_id = req.body.user_id;
   User.findOne({ 'slack_id': slack_id }, function (err, user) {
 
-    if (err) { }
+    if (err) { console.error('Finding User error: ' + err); }
     var text;
 
     var command = req.body.text.split(" ")[0];
 
     // If user doesn't exist, hijack command to register
-    if(!user){
+    if(!user) {
       command = "register";
     }
 
+    // This is pretty ugly. :)
     switch(command.toLowerCase()) {
       case 'register':
-        text = "Register at" + baseUrl + 'todoist?slack_id=' + slack_id;
+        var registration_hash = crypto.randomBytes(20).toString('hex');
+        var now = new Date();
+        var days_valid = 1;
+        var valid_until = now.setTime(now.getTime() + days_valid * 86400000);
+        RegistrationToken.findOneAndUpdate({slack_id: slack_id}, {registration_hash: registration_hash, valid_until: valid_until}, { upsert: true, 'new': true}, function(err, token) {
+          if (err) { console.error('Finding / Updating Registration Token error: ' + err); }
+          text = "Register at " + baseUrl + 'todoist/' + token.registration_hash;
+          res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+          res.end(text);
+        });
         break;
-
       case 'add':
       default:
         text = 'Adding "' + req.body.text + '" to todoist.com';
         todoist.itemAdd(req.body.text, user.todoist_oauth_token);
+
+        text += "\n\nDEBUG command="+command+"\nuser="+JSON.stringify(user);
+        console.log(text);
+
+        res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+        res.end(text);
+        break;
     }
-
-    text += "\n\nDEBUG command="+command+"\nuser="+JSON.stringify(user);
-
-    console.log(text);
-
-    res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-    res.end(text);
-
   });
 });
 
-app.get('/todoist', function(req, res) {
-  var slack_id = req.query.slack_id;
-  req.session.slack_id = slack_id;
-  res.redirect('/auth');
+app.get('/todoist/:hash', function(req, res) {
+  var registration_hash = req.params.hash;
+  RegistrationToken.findOne({registration_hash: registration_hash}, function(err, token) {
+    if (err) { console.error('Finding Registration Token error: ' + err); }
+    if (token && token.valid_until > new Date()) {
+      req.session.slack_id = token.slack_id;
+      res.redirect('/auth');
+    } else {
+      res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+      res.end('Unable to find your registration token, please try again');
+    }
+  });
 });
 
 // OAuth stuffs
