@@ -141,12 +141,6 @@ function handle_projects(req, res, user) {
 
 }
 
-function get_labels_from_text(text) {
-  // This will remove the @mentions in a body of text
-  var pattern = /\B@[a-z0-9_-]+/gi;
-  return text.match(pattern);
-}
-
 app.post('/slash', function(req, res) {
   User.findOne({ 'slack_id': req.body.user_id }, function (err, user) {
     if (err) { console.error('Finding User error: ' + err); }
