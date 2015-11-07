@@ -81,13 +81,29 @@ app.post('/slash', function(req, res) {
         RegistrationToken.findOneAndUpdate({slack_id: slack_id}, {registration_hash: registration_hash, valid_until: valid_until}, { upsert: true, 'new': true}, function(err, token) {
           if (err) { console.error('Finding / Updating Registration Token error: ' + err); }
           text = "Don't think we've seen you before. Please register @ " + baseUrl + 'todoist/' + token.registration_hash;
-          res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+          res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
           res.end(text);
         });
         return;
+      case 'unregister':
+        if (user) {
+          User.remove({ _id: user.id }, function(err) {
+            if (err) { console.error('Removing User error: ' + err); }
+            else {
+              text = "Boomtime! You've been unregistered!";
+              res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
+              res.end(text);
+              return;
+            }
+          });
+        } else {
+          res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
+          res.end('To unregister, you need to register first!');
+          return;
+        }
       case 'add':
       default:
-        // This isn't right. We need a callback somewhere in case an error happens - it errors out for me.
+        // This isn't right. We need a callback somewhere in case an error happens.
         text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
         todoist.itemAdd(req.body.text, user.todoist_oauth_token);
 
