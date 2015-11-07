@@ -1,14 +1,15 @@
 var express = require('express');
+var mongoose = require('mongoose');
+var passport = require('passport');
+var Oauth2Strategy= require('passport-oauth2').Strategy;
 var app = express();
-var passport = require('')
 
 passport.use(new OAuth2Strategy({
-    authorizationURL: 'https://todoist.com/oauth/authorize',
-    tokenURL: 'https://todoist.com/oauth/access_token',
-    clientID: process.env.CLIENT_ID_TODOIST,
-    clientSecret: process.env.CLIENT_SECRET_TODOIST,
-    callbackURL: "http://slacklemore-55043.onmodulus.net/auth/callback"
-  },
+  authorizationURL: 'https://todoist.com/oauth/authorize?scope=task:add,data:read&state=slacklemore&client_id' + process.env.CLIENT_ID_TODOIST,
+  tokenURL: 'https://todoist.com/oauth/access_token',
+  clientID: process.env.CLIENT_ID_TODOIST,
+  clientSecret: process.env.CLIENT_SECRET_TODOIST,
+  callbackURL: "http://slacklemore-55043.onmodulus.net/auth/callback"},
   function(accessToken, refreshToken, profile, done) {
     User.findOrCreate({ exampleId: profile.id }, function (err, user) {
       return done(err, user);
@@ -21,6 +22,7 @@ app.configure(function() {
 });
 
 app.post('/slash', function(req, res) {
+
 });
 
 // OAuth stuffs
