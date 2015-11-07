@@ -54,6 +54,6 @@ Once set, update the URL for the slash command on Slack.com to fit the URL of yo
 
 ## Feedback
 
-If you have feedback of any kind (you know, to tell us how awesome we are), we're easily found on the Twitters [@mckaydavis](https://twitter.com/mckaydavis) [@ryankanno](https://twitter.com/ryankanno)
+If you have feedback of any kind (you know, to tell us how awesome we are), we're easily found on the Twitters - [@mckayhdavis](https://twitter.com/mckayhdavis) [@ryankanno](https://twitter.com/ryankanno)
 
-->![DoAllTheThings](http://www.puravidamultimedia.com/wp-content/uploads/2013/09/image.png)<-
+![DoAllTheThings](http://www.puravidamultimedia.com/wp-content/uploads/2013/09/image.png)

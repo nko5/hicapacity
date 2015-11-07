@@ -72,6 +72,8 @@ function respond(res, text) {
 
 
 function handle_register(req, res, user) {
+  console.log(">>>> In register handler");
+
   var slack_id = req.body.user_id;
   var registration_hash = crypto.randomBytes(20).toString('hex');
   var now = new Date();
@@ -87,6 +89,7 @@ function handle_register(req, res, user) {
 
 
 function handle_unregister(req, res, user) {
+  console.log(">>>> In unregister handler");
   if (user) {
     User.remove({ _id: user.id }, function(err) {
       if (err) { console.error('Removing User error: ' + err); }
@@ -103,12 +106,10 @@ function handle_unregister(req, res, user) {
 
 
 function handle_add(req,res,user) {
+  console.log(">>>> In add handler");
+
   // This isn't right. We need a callback somewhere in case an error happens.
   var text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
-  console.log("handle add");
-  console.log(req.body.text);
-  console.log(text);
-  console.log(user.todoist_oauth_token);
   todoist.itemAdd(user.todoist_oauth_token, req.body.text);
   respond(res, text);
 }
@@ -133,20 +134,23 @@ function handle_list(req, res, user) {
 
 }
 
-function handle_projects(req, res, user) {
-//  respond(res, 'Requesting projects');
+function handle_labels(req, res, user) {
+  todoist.getAll(user.todoist_oauth_token)
+    .then(function(data){
+      var text = data.Labels.join(", ");
+      respond(res, text);
+    })
+    .done();
+}
 
-  todoist.getAll(debug_token)
+function handle_projects(req, res, user) {
+  todoist.getAll(user.todoist_oauth_token)
     .then(function(data){
       var projects = _.pluck(data.Projects, "name");
       var text = projects.join("\n");
       respond(res, text);
-      //console.log("projects: "+projects.join("\n"));
     })
-  ;
-
-  //var data = todoist.getAll(user.todoist_oauth_token);
-
+    .done();
 }
 
 app.post('/slash', function(req, res) {
@@ -170,7 +174,8 @@ app.post('/slash', function(req, res) {
       today: handle_today,
       week: handle_week,
       list: handle_list,
-      projects: handle_projects
+      projects: handle_projects,
+      labels: handle_labels,
     };
 
     console.log(command);
@@ -212,8 +217,7 @@ app.get('/sadface', function(req, res) {
 
 // Happyface :)
 app.get('/happyface', function(req, res) {
-  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-  res.sendfile(__dirname + '/happyface.html');
+  res.sendfile(__dirname + '/public/happyface.html');
 });
 
 

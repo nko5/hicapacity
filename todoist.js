@@ -64,6 +64,26 @@ function todoistItemAdd(token, content) {
 }
 
 
+function strip_labels_from_text(text) {
+  var pattern = /\B@[a-z0-9_-]+/gi;
+  return text.replace(pattern, "");
+}
+
+
+function get_project_ids_from_labels(text, projects) {
+  var pattern = /\B@[a-z0-9_-]+/gi;
+  var labels = text.match(pattern);
+  var project_ids = [];
+  if (labels)
+  {
+    labels.forEach(function(label) {
+      // find label in projects and append to project_ids
+    });
+  }
+  return project_ids;
+}
+
+
 module.exports = {
   itemAdd : todoistItemAdd,
   getToday: function(token) {
