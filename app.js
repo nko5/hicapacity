@@ -57,9 +57,64 @@ app.configure(function() {
   app.use(express.static(__dirname + '/public'));
 });
 
-app.post('/slash', function(req, res) {
+
+
+
+
+
+
+
+function handle_register(req, res, user) {
   var slack_id = req.body.user_id;
-  User.findOne({ 'slack_id': slack_id }, function (err, user) {
+  var registration_hash = crypto.randomBytes(20).toString('hex');
+  var now = new Date();
+  var days_valid = 1;
+  var valid_until = now.setTime(now.getTime() + days_valid * 86400000);
+  RegistrationToken.findOneAndUpdate({slack_id: slack_id}, {registration_hash: registration_hash, valid_until: valid_until}, { upsert: true, 'new': true}, function(err, token) {
+    if (err) { console.error('Finding / Updating Registration Token error: ' + err); }
+    var text = "Don't think we've seen you before. Please register @ " + baseUrl + 'todoist/' + token.registration_hash;
+    res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
+    res.end(text);
+  });
+}
+
+
+
+function handle_unregister(req, res, user) {
+  if (user) {
+    User.remove({ _id: user.id }, function(err) {
+      if (err) { console.error('Removing User error: ' + err); }
+      else {
+        var text = "Boomtime! You've been unregistered!";
+        res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
+        res.end(text);
+        return;
+      }
+    });
+  } else {
+    res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
+    res.end('To unregister, you need to register first!');
+    return;
+  }
+}
+
+
+function handle_add(req,res,user) {
+  // This isn't right. We need a callback somewhere in case an error happens.
+  var text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
+  todoist.itemAdd(req.body.text, user.todoist_oauth_token);
+
+  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+  res.end(text);
+}
+
+
+
+
+
+
+app.post('/slash', function(req, res) {
+  User.findOne({ 'slack_id': req.body.user_id }, function (err, user) {
 
     if (err) { console.error('Finding User error: ' + err); }
     var text;
@@ -71,46 +126,15 @@ app.post('/slash', function(req, res) {
       command = "register";
     }
 
-    // This is pretty ugly. :)
-    switch(command.toLowerCase()) {
-      case 'register':
-        var registration_hash = crypto.randomBytes(20).toString('hex');
-        var now = new Date();
-        var days_valid = 1;
-        var valid_until = now.setTime(now.getTime() + days_valid * 86400000);
-        RegistrationToken.findOneAndUpdate({slack_id: slack_id}, {registration_hash: registration_hash, valid_until: valid_until}, { upsert: true, 'new': true}, function(err, token) {
-          if (err) { console.error('Finding / Updating Registration Token error: ' + err); }
-          text = "Don't think we've seen you before. Please register @ " + baseUrl + 'todoist/' + token.registration_hash;
-          res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
-          res.end(text);
-        });
-        return;
-      case 'unregister':
-        if (user) {
-          User.remove({ _id: user.id }, function(err) {
-            if (err) { console.error('Removing User error: ' + err); }
-            else {
-              text = "Boomtime! You've been unregistered!";
-              res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
-              res.end(text);
-              return;
-            }
-          });
-        } else {
-          res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
-          res.end('To unregister, you need to register first!');
-          return;
-        }
-      case 'add':
-      default:
-        // This isn't right. We need a callback somewhere in case an error happens.
-        text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
-        todoist.itemAdd(req.body.text, user.todoist_oauth_token);
+    command = command.toLowerCase() || "add";
 
-        res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-        res.end(text);
-        return;
-    }
+    // How's this for ugly?
+    ({
+      register: handle_register,
+      unregister: handle_unregister,
+      add: handle_add
+    })[command](req, res, user);
+
   });
 });
 
