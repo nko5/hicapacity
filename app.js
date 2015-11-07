@@ -3,7 +3,6 @@ var passport = require('passport');
 var OAuth2Strategy= require('passport-oauth2').Strategy;
 var mongoose = require('mongoose');
 var User = require("./models/users.js");
-//var querystring = require('querystring');
 var app = express();
 
 // Connect to database
@@ -40,31 +39,26 @@ app.configure(function() {
   app.use(express.static(__dirname + '/public'));
 });
 
-
-
-/*
-function slackSlash(req, res){
-  var body = querystring.parse(req.body);
-  var text = "/slash body: "+JSON.stringify(body);
-  console.log(text);
-
-  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-  res.end(text);
-}
-*/
-
-app.post('/slash', function(req, res){
+app.post('/slash', function(req, res) {
+  console.log("Entering slash");
   var slack_id = req.body.user_id;
   User.findOne({ 'slack_id': slack_id }, function (err, user) {
     if (err) {
-      var text = 'http://slacklemore-55043.onmodulus.net/todoist?id=' + slack_id;
+      console.log("Can't find slack_id: " + slack_id);
+      var text = 'https://slacklemore-55043.onmodulus.net/todoist?slack_id=' + slack_id;
       res.writeHead(200, "OK", {'Content-Type': 'text/html'});
       res.end(text);
-    } else if (user)
-    {
+    } else if (user) {
+      console.log("Found user");
       // TODOIST CALL HERE
     }
   });
+});
+
+app.get('/todoist', function(req, res) {
+  var slack_id = req.query.slack_id;
+  req.session.slack_id = slack_id;
+  res.redirect('/auth');
 });
 
 // OAuth stuffs
