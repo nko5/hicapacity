@@ -58,12 +58,6 @@ app.configure(function() {
 });
 
 
-
-
-
-
-
-
 function handle_register(req, res, user) {
   var slack_id = req.body.user_id;
   var registration_hash = crypto.randomBytes(20).toString('hex');
@@ -77,7 +71,6 @@ function handle_register(req, res, user) {
     res.end(text);
   });
 }
-
 
 
 function handle_unregister(req, res, user) {
@@ -110,14 +103,9 @@ function handle_add(req,res,user) {
 
 
 
-
-
-
 app.post('/slash', function(req, res) {
   User.findOne({ 'slack_id': req.body.user_id }, function (err, user) {
-
     if (err) { console.error('Finding User error: ' + err); }
-    var text;
 
     var command = req.body.text.split(" ")[0];
 
