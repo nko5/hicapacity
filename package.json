@@ -6,6 +6,7 @@
   "main": "./app.js",
   "dependencies": {
     "express": "3.x.x",
+    "mongoose": "^4.2.4",
     "node-todoist": "jtarasovic/node-todoist-api",
     "passport": "^0.3.0",
     "passport-oauth2": "^1.1.2",
