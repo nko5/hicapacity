@@ -69,6 +69,8 @@ function respond(res, text) {
 
 
 function handle_register(req, res, user) {
+  console.log(">>>> In register handler");
+
   var slack_id = req.body.user_id;
   var registration_hash = crypto.randomBytes(20).toString('hex');
   var now = new Date();
@@ -84,6 +86,7 @@ function handle_register(req, res, user) {
 
 
 function handle_unregister(req, res, user) {
+  console.log(">>>> In unregister handler");
   if (user) {
     User.remove({ _id: user.id }, function(err) {
       if (err) { console.error('Removing User error: ' + err); }
@@ -100,6 +103,8 @@ function handle_unregister(req, res, user) {
 
 
 function handle_add(req,res,user) {
+  console.log(">>>> In add handler");
+
   // This isn't right. We need a callback somewhere in case an error happens.
   var text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
   console.log("handle add");
@@ -134,6 +139,12 @@ function handle_projects(req, res, user) {
   respond(res, 'Requesting projects');
   // data = todoist.getProjects(user.todoist_oauth_token);
 
+}
+
+function get_labels_from_text(text) {
+  // This will remove the @mentions in a body of text
+  var pattern = /\B@[a-z0-9_-]+/gi;
+  return text.match(pattern);
 }
 
 app.post('/slash', function(req, res) {
