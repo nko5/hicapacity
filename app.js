@@ -10,7 +10,7 @@ mongoose.connect(process.env.MONGO_URI);
 mongoose.connection.on('error', function(err) {
 	console.error('MongoDB connection error: ' + err);
 	process.exit(-1);
-	});
+});
 
 passport.use(new OAuth2Strategy({
   authorizationURL: 'https://todoist.com/oauth/authorize',
@@ -19,11 +19,14 @@ passport.use(new OAuth2Strategy({
   clientSecret: process.env.CLIENT_SECRET_TODOIST,
   callbackURL: 'http://slacklemore-55043.onmodulus.net/auth/callback',
   scope: 'task:add,data:read',
-  state: 'slacklemore'},
-  function(accessToken, refreshToken, profile, done) {
+  state: 'slacklemore',
+  passReqToCallback: true},
+  function(request, accessToken, refreshToken, profile, done) {
+    console.log("request:" + JSON.stringify(request));
     console.log("accessToken:" + accessToken);
     console.log("refreshToken:" + refreshToken);
-    console.log("profile:" + profile);
+    console.log("profile:" + JSON.stringify(profile));
+    done();
   }
 ));
 
