@@ -1,3 +1,5 @@
+"use strict";
+
 var crypto = require("crypto");
 var express = require('express');
 var passport = require('passport');
@@ -58,6 +60,14 @@ app.configure(function() {
 });
 
 
+function respond(res, text) {
+  console.log("Responding 200 OK with: "+text);
+  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+  res.end(text);
+}
+
+
+
 function handle_register(req, res, user) {
   var slack_id = req.body.user_id;
   var registration_hash = crypto.randomBytes(20).toString('hex');
@@ -79,15 +89,12 @@ function handle_unregister(req, res, user) {
       if (err) { console.error('Removing User error: ' + err); }
       else {
         var text = "Boomtime! You've been unregistered!";
-        res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
-        res.end(text);
+        respond(text);
         return;
       }
     });
   } else {
-    res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
-    res.end('To unregister, you need to register first!');
-    return;
+    respond('To unregister, you need to register first!');
   }
 }
 
@@ -95,13 +102,39 @@ function handle_unregister(req, res, user) {
 function handle_add(req,res,user) {
   // This isn't right. We need a callback somewhere in case an error happens.
   var text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
-  todoist.itemAdd(req.body.text, user.todoist_oauth_token);
-
-  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-  res.end(text);
+  console.log("handle add");
+  console.log(req.body.text);
+  console.log(text);
+  console.log(user.todoist_oauth_token);
+  todoist.itemAdd(user.todoist_oauth_token, req.body.text);
+  respond(res, text);
 }
 
 
+
+function handle_today(req, res, user) {
+  respond(res, 'Requesting today');
+  // data = todoist.getToday(user.todoist_oauth_token);
+}
+
+
+function handle_week(req, res, user) {
+  respond(res, 'Requesting week');
+  // data = todoist.getWeek(user.todoist_oauth_token);
+
+}
+
+function handle_list(req, res, user) {
+  respond(res, 'Requesting list');
+  // data = todoist.getList(user.todoist_oauth_token);
+
+}
+
+function handle_projects(req, res, user) {
+  respond(res, 'Requesting projects');
+  // data = todoist.getProjects(user.todoist_oauth_token);
+
+}
 
 app.post('/slash', function(req, res) {
   User.findOne({ 'slack_id': req.body.user_id }, function (err, user) {
@@ -114,14 +147,24 @@ app.post('/slash', function(req, res) {
       command = "register";
     }
 
-    command = command.toLowerCase() || "add";
+    command = command.toLowerCase();
 
     // How's this for ugly?
-    ({
+    var handlers = {
       register: handle_register,
       unregister: handle_unregister,
-      add: handle_add
-    })[command](req, res, user);
+      add: handle_add,
+      today: handle_today,
+      week: handle_week,
+      list: handle_list,
+      projects: handle_projects
+    };
+
+    console.log(command);
+
+    var handler = handlers[command] || handlers.add;
+
+    handler(req, res, user);
 
   });
 });
@@ -134,8 +177,7 @@ app.get('/todoist/:hash', function(req, res) {
       req.session.slack_id = token.slack_id;
       res.redirect('/auth');
     } else {
-      res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-      res.end('Unable to find your registration token, please try again');
+      respond('Unable to find your registration token, please try again');
     }
   });
 });
@@ -152,8 +194,7 @@ app.get('/auth/callback',
 
 // Sadface :(
 app.get('/sadface', function(req, res) {
-  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-  res.end(':(');
+  respond(':(');
 });
 
 // Happyface :)
@@ -162,6 +203,8 @@ app.get('/happyface', function(req, res) {
   res.sendfile(__dirname + '/happyface.html');
 });
 
-var port = 8080;
+todoist.itemAdd("2c81a9dabb36ecdecdccd23c9e8651f4d9af8959", "DEBUG: app started "+(new Date().toISOString()));
+
+var port = process.env.PORT || 8080;
 app.listen(port);
 console.log('Express server started on port %s', port);

@@ -1,5 +1,24 @@
 var uuid = require('node-uuid');
 var https = require('https');
+var Q = require('q');
+
+var httpsGet = function (url) {
+  var deferred = Q.defer();
+  console.log("Todoist GET URL " + url);
+  https.get(url, function(res) {
+    res.on('data', function(data) {
+      deferred.resolve(data);
+    });
+  });
+  return deferred.promise;
+};
+
+
+function todoist(url, success, fail) {
+  httpsGet(url)
+    .then(success)
+    .catch(fail);
+}
 
 function todoistURL(type, args, token){
   var url =  "https://todoist.com/API/v6/sync";
@@ -23,8 +42,19 @@ function todoistURL(type, args, token){
 };
 
 
-function todoistItemAdd(content, token) {
-  var todoistUrl = todoistURL('item_add', {content: content}, token);
+function todoistItemAdd(token, content) {
+  todoist(todoistURL('item_add', {content: content}, token),
+          function(d) {
+            process.stdout.write(d);
+          },
+          function(err) {
+            console.log("something went wrong w/ httpsGet!");
+          });
+}
+
+
+/*
+
   console.log("todoistUrl="+todoistUrl);
   https.get(todoistUrl, function(res) {
     res.on('data', function(d) {
@@ -32,7 +62,20 @@ function todoistItemAdd(content, token) {
     });
   });
 }
+*/
 
 module.exports = {
-  itemAdd : todoistItemAdd
+  itemAdd : todoistItemAdd,
+  getToday: function(token) {
+    return {};
+  },
+  getWeek: function(token) {
+    return {};
+  },
+  getList: function(token, project) {
+    return {};
+  },
+  getProjects: function(token,project) {
+    return {};
+  }
 };
