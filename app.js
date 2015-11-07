@@ -5,6 +5,8 @@ var mongoose = require('mongoose');
 var User = require("./models/users.js");
 var app = express();
 
+var baseUrl = process.env.BASE_URL || "http://slacklemore-55043.onmodulus.net/";
+
 // Connect to database
 mongoose.connect(process.env.MONGO_URI);
 mongoose.connection.on('error', function(err) {
@@ -33,7 +35,7 @@ passport.use(new OAuth2Strategy({
   tokenURL: 'https://todoist.com/oauth/access_token',
   clientID: process.env.CLIENT_ID_TODOIST,
   clientSecret: process.env.CLIENT_SECRET_TODOIST,
-  callbackURL: 'http://slacklemore-55043.onmodulus.net/auth/callback',
+  callbackURL: baseUrl + 'auth/callback',
   scope: 'task:add,data:read',
   state: 'slacklemore',
   passReqToCallback: true},
@@ -60,15 +62,17 @@ app.post('/slash', function(req, res) {
   var slack_id = req.body.user_id;
   User.findOne({ 'slack_id': slack_id }, function (err, user) {
     if (err) { }
+    var text;
+
     if (user) {
-      var text = 'Sending "' + req.body.text + '" to TODOIST';
-      res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-      res.end(text);
+      text = 'Sending "' + req.body.text + '" to TODOIST';
     } else {
-      var text = 'https://slacklemore-55043.onmodulus.net/todoist?slack_id=' + slack_id;
-      res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-      res.end(text);
+      text = baseUrl + 'todoist?slack_id=' + slack_id;
     }
+
+    res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+    res.end(text);
+
   });
 });
 
@@ -91,7 +95,8 @@ app.get('/auth/callback',
   });
 
 app.get('/sadface', function(req, res) {
-  res.done();
+  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+  res.end(':(');
 });
 
 var port = 8080;
