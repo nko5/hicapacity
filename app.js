@@ -54,17 +54,17 @@ function slackSlash(req, res){
 */
 
 app.post('/slash', function(req, res){
-  // 1. Get slack id from req.
-  // 2. Use slack id to look up access token in the database.
-  // 3. If found, send command over to todoist.
-  // 4. If not found, send user the following url
-  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-  var text = "";
-  text += "body: " + JSON.stringify(req.body);
-  text += "\nparams: " + JSON.stringify(req.params);
-
-  console.log(text);
-  res.end(text);
+  var slack_id = req.body.user_id;
+  User.findOne({ 'slack_id': slack_id }, function (err, user) {
+    if (err) {
+      var text = 'http://slacklemore-55043.onmodulus.net/todoist?id=' + slack_id;
+      res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+      res.end(text);
+    } else if (user)
+    {
+      // TODOIST CALL HERE
+    }
+  });
 });
 
 // OAuth stuffs
