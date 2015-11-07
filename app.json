@@ -1,21 +1,25 @@
 {
   "name": "slack-todoist",
   "description": "Add todo items to your Inbox",
-  "repository": "https://github.com/ryankanno/slack-todoist",
-  "website": "https://github.com/ryankanno/slack-todoist",
+  "repository": "https://github.com/nko5/hicapacity",
+  "website": "https://github.com/nko5/hicapacity",
   "keywords": ["slack", "command", "bot", "chat"],
   "env": {
-    "SLACK_HOOK_URL": {
-      "description": "Slack incoming WebHook URL",
+    "CLIENT_ID_TODOIST": {
+      "description": "Client id from Todoist.com",
       "required": true
     },
-    "USERNAME": {
-      "description": "Optional: Username to use when replying with the conversion result (default: todoist)",
-      "required": false
+    "CLIENT_SECRET_TODOIST": {
+      "description": "Client secret from Todoist.com",
+      "required": true
     },
-    "EMOJI": {
-      "description": "Optional: Emoji icon to use when replying with the conversion result (default: )",
-      "required": false
+    "MONGO_URI": {
+      "description": "Mongo URI",
+      "required": true
+    },
+    "BASE_URL": {
+      "description": "Base URL",
+      "required": true
     },
     "SLACK_TOKEN": {
       "description": "Optional: Additional security step: Slack slash command token for verification that the request came from your Slack team",
