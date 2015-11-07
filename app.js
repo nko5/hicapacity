@@ -156,16 +156,22 @@ app.get('/todoist/:hash', function(req, res) {
 app.get('/auth', passport.authenticate('oauth2'));
 
 app.get('/auth/callback',
-  passport.authenticate('oauth2', { failureRedirect: '/sadface' }),
-  function(req, res) {
-    // 2. Show magic page
-    // 3. If time, use slack-notify to message you that you're good to go
-    res.redirect('/');
-  });
+  passport.authenticate(
+    'oauth2', { failureRedirect: '/sadface' }),
+    function(req, res) {
+      res.redirect('/happyface');
+});
 
+// Sadface :(
 app.get('/sadface', function(req, res) {
   res.writeHead(200, "OK", {'Content-Type': 'text/html'});
   res.end(':(');
+});
+
+// Happyface :)
+app.get('/happyface', function(req, res) {
+  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+  res.sendfile(__dirname + '/happyface.html');
 });
 
 var port = 8080;
