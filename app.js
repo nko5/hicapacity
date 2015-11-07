@@ -84,18 +84,16 @@ app.post('/slash', function(req, res) {
           res.writeHead(200, "OK", {'Content-Type': 'text/html'});
           res.end(text);
         });
-        break;
+        return;
       case 'add':
       default:
-        text = 'Adding "' + req.body.text + '" to todoist.com';
+        // This isn't right. We need a callback somewhere in case an error happens - it errors out for me.
+        text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
         todoist.itemAdd(req.body.text, user.todoist_oauth_token);
-
-        text += "\n\nDEBUG command="+command+"\nuser="+JSON.stringify(user);
-        console.log(text);
 
         res.writeHead(200, "OK", {'Content-Type': 'text/html'});
         res.end(text);
-        break;
+        return;
     }
   });
 });
