@@ -36,4 +36,3 @@ function todoistItemAdd(content, token) {
 module.exports = {
   itemAdd : todoistItemAdd
 };
-
