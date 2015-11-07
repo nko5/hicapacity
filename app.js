@@ -11,7 +11,7 @@ mongoose.connect(process.env.MONGO_URI);
 mongoose.connection.on('error', function(err) {
 	console.error('MongoDB connection error: ' + err);
 	process.exit(-1);
-	});
+});
 
 passport.use(new OAuth2Strategy({
   authorizationURL: 'https://todoist.com/oauth/authorize',
@@ -20,11 +20,13 @@ passport.use(new OAuth2Strategy({
   clientSecret: process.env.CLIENT_SECRET_TODOIST,
   callbackURL: 'http://slacklemore-55043.onmodulus.net/auth/callback',
   scope: 'task:add,data:read',
-  state: 'slacklemore'},
-  function(accessToken, refreshToken, profile, done) {
-    console.log("accessToken:" + accessToken);
-    console.log("refreshToken:" + refreshToken);
-    console.log("profile:" + profile);
+  state: 'slacklemore',
+  passReqToCallback: true},
+  function(request, accessToken, refreshToken, profile, done) {
+    var slack_id = request.session.slack_id;
+    User.findOneAndUpdate({ slack_id: slack_id}, {todoist_oauth_token: accessToken}, {upsert:true}, function(err, user) {
+      return done(err, user);
+    });
   }
 ));
 
@@ -71,6 +73,7 @@ app.get('/auth', passport.authenticate('oauth2'));
 app.get('/auth/callback',
   passport.authenticate('oauth2', { failureRedirect: '/sadface' }),
   function(req, res) {
+    console.log("SUCCESSFULLY SAVED");
     // Successful authentication.
     // 1. Save slack id -> token.
     // 2. Show magic page
