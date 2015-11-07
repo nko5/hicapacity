@@ -1,9 +1,16 @@
 var express = require('express');
 var passport = require('passport');
 var OAuth2Strategy= require('passport-oauth2').Strategy;
-var User = require("./models/users.js");
 var mongoose = require('mongoose');
+var User = require("./models/users.js");
 var app = express();
+
+// Connect to database
+mongoose.connect(process.env.MONGO_URI);
+mongoose.connection.on('error', function(err) {
+	console.error('MongoDB connection error: ' + err);
+	process.exit(-1);
+	});
 
 passport.use(new OAuth2Strategy({
   authorizationURL: 'https://todoist.com/oauth/authorize',
@@ -21,6 +28,12 @@ passport.use(new OAuth2Strategy({
 ));
 
 app.configure(function() {
+  app.use(express.cookieParser());
+  app.use(express.bodyParser());
+  app.use(express.session({ secret: 'keyboard cat' }));
+  app.use(passport.initialize());
+  app.use(passport.session());
+  app.use(app.router);
   app.use(express.static(__dirname + '/public'));
 });
 
@@ -28,7 +41,7 @@ app.post('/slash', function(req, res) {
   // 1. Get slack id from req.
   // 2. Use slack id to look up access token in the database.
   // 3. If found, send command over to todoist.
-  // 4. If not found, send user the following url.
+  // 4. If not found, send user the following url
 });
 
 // OAuth stuffs
@@ -45,7 +58,7 @@ app.get('/auth/callback',
   });
 
 app.get('/sadface', function(req, res) {
-
+  res.done();
 });
 
 var port = 8080;
