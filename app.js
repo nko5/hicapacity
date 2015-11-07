@@ -35,7 +35,7 @@ passport.use(new OAuth2Strategy({
   clientID: process.env.CLIENT_ID_TODOIST,
   clientSecret: process.env.CLIENT_SECRET_TODOIST,
   callbackURL: baseUrl + 'auth/callback',
-  scope: 'task:add,data:read',
+  scope: 'task:add,data:read_write',
   state: 'slacklemore',
   passReqToCallback: true},
   function(request, accessToken, refreshToken, profile, done) {
