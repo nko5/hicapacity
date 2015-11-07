@@ -4,6 +4,7 @@ var OAuth2Strategy= require('passport-oauth2').Strategy;
 var mongoose = require('mongoose');
 var User = require("./models/users.js");
 var app = express();
+var todoist = require("./todoist.js");
 
 var baseUrl = process.env.BASE_URL || "http://slacklemore-55043.onmodulus.net/";
 
@@ -64,11 +65,27 @@ app.post('/slash', function(req, res) {
     if (err) { }
     var text;
 
-    if (user) {
-      text = 'Sending "' + req.body.text + '" to TODOIST';
-    } else {
-      text = baseUrl + 'todoist?slack_id=' + slack_id;
+    var command = req.body.text.split(" ")[0];
+
+    // If user doesn't exist, hijack command to register
+    if(!user){
+      command = "register";
     }
+
+    switch(command.toLowerCase()) {
+    case 'register':
+      text = "Register at" + baseUrl + 'todoist?slack_id=' + slack_id;
+      break;
+
+    case 'add':
+    default:
+      text = 'Adding "' + req.body.text + '" to todoist.com';
+      todoist.itemAdd(req.body.text, user.todoist_oauth_token);
+    }
+
+    text += "\n\nDEBUG command="+command+"\nuser="+JSON.stringify(user);
+
+    console.log(text);
 
     res.writeHead(200, "OK", {'Content-Type': 'text/html'});
     res.end(text);

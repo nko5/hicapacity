@@ -5,15 +5,19 @@
   "author": "Node Knockout Team <all@nodeknockout.com>",
   "main": "./app.js",
   "dependencies": {
+    "body-parser": "^1.14.1",
     "express": "3.x.x",
     "mongoose": "^4.2.4",
     "node-todoist": "jtarasovic/node-todoist-api",
+    "node-uuid": "^1.4.3",
     "passport": "^0.3.0",
     "passport-oauth2": "^1.1.2",
-    "slack-notify": "^0.1.4"
+    "restler": "^3.4.0",
+    "slack-notify": "^0.1.4",
+    "uuid": "^2.0.1"
   },
   "scripts": {
-    "start": "node app.js",
+    "start": "date && node app.js",
     "postinstall": "node scripts/postinstall.js"
   },
   "engine": "node 4.2.2"
