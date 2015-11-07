@@ -2,6 +2,7 @@
 
 var http = require('http');
 var querystring = require('querystring');
+var todoist = require('todoist');
 var slack = require('slack-notify')(process.env.SLACK_HOOK_URL);
 
 var config =  {
@@ -12,6 +13,7 @@ var config =  {
 
 http.createServer(function (req, res) {
   var body = '';
+
   req.on('data', function(chunk) {
     body += chunk;
   });
@@ -22,7 +24,6 @@ http.createServer(function (req, res) {
 
     body = querystring.parse(body);
     console.log(body);
-
     handlePayload(body);
   });
 }).listen(process.env.PORT || 1337);
@@ -34,13 +35,38 @@ function handlePayload(body){
 
   var text = body.text.split(' ');
 
+  // send text to todoist here, then update slack.
+
   slack.send({
     username: config.username,
     icon_emoji: config.emoji,
     channel: body.channel_id,
     text: '_' + body.command + ' ' + body.text + '_',
     attachments: [{
-      title: 'result here'
+      title: result.Title,
+      title_link: 'http://www.imdb.com/title/' + result.imdbID,
+      color: '#FFB10A',
+      image_url: result.Poster,
+      fields: [{
+        title: 'Rating',
+        value: result.imdbRating + ' (' + result.imdbVotes + ' votes)',
+        short: true
+      }, {
+        title: 'Year',
+        value: result.Year,
+        short: true
+      }, {
+        title: 'Runtime',
+        value: result.Runtime,
+        short: true
+      }, {
+        title: 'Director',
+        value: result.Director,
+        short: true
+      }, {
+        title: 'Actors',
+        value: result.Actors
+      }]
     }]
   });
 }
