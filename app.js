@@ -1,5 +1,4 @@
 var express = require('express');
-var mongoose = require('mongoose');
 var passport = require('passport');
 var Oauth2Strategy= require('passport-oauth2').Strategy;
 var app = express();
