@@ -80,7 +80,7 @@ app.post('/slash', function(req, res) {
         var valid_until = now.setTime(now.getTime() + days_valid * 86400000);
         RegistrationToken.findOneAndUpdate({slack_id: slack_id}, {registration_hash: registration_hash, valid_until: valid_until}, { upsert: true, 'new': true}, function(err, token) {
           if (err) { console.error('Finding / Updating Registration Token error: ' + err); }
-          text = "Register at " + baseUrl + 'todoist/' + token.registration_hash;
+          text = "Don't think we've seen you before. Please register @ " + baseUrl + 'todoist/' + token.registration_hash;
           res.writeHead(200, "OK", {'Content-Type': 'text/html'});
           res.end(text);
         });
