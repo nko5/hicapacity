@@ -6,10 +6,17 @@ var httpsGet = function (url) {
   var deferred = Q.defer();
   console.log("Todoist GET URL " + url);
   https.get(url, function(res) {
+    var buf = '';
     res.on('data', function(data) {
-      deferred.resolve(data);
+      buf += data;
+
+    });
+
+    res.on('end', function(data) {
+      deferred.resolve(buf);
     });
   });
+
   return deferred.promise;
 };
 
@@ -20,19 +27,9 @@ function todoist(url, success, fail) {
     .catch(fail);
 }
 
-function todoistURL(type, args, token){
+
+function todoistURL(data){
   var url =  "https://todoist.com/API/v6/sync";
-
-  var data = {
-    token: token,
-    commands: [{
-      type: type,
-      temp_id: uuid.v4(),
-      uuid: uuid.v4(),
-      args: args
-    }]};
-
-
   var query = [];
   for(var k in data) {
     query.push(k+'='+(typeof data[k] === 'string' ? data[k] : JSON.stringify(data[k])));
@@ -42,8 +39,22 @@ function todoistURL(type, args, token){
 };
 
 
+function todoistCommandURL(type, args, token){
+  return todoistURL({
+    token: token,
+    commands: [{
+      type: type,
+      temp_id: uuid.v4(),
+      uuid: uuid.v4(),
+      args: args
+    }]});
+};
+
+
 function todoistItemAdd(token, content) {
-  todoist(todoistURL('item_add', {content: content}, token),
+  var url = todoistCommandURL('item_add', {content: content}, token);
+
+  todoist(url,
           function(d) {
             process.stdout.write(d);
           },
@@ -52,17 +63,6 @@ function todoistItemAdd(token, content) {
           });
 }
 
-
-/*
-
-  console.log("todoistUrl="+todoistUrl);
-  https.get(todoistUrl, function(res) {
-    res.on('data', function(d) {
-      process.stdout.write(d);
-    });
-  });
-}
-*/
 
 module.exports = {
   itemAdd : todoistItemAdd,
@@ -77,5 +77,20 @@ module.exports = {
   },
   getProjects: function(token,project) {
     return {};
+  },
+
+  getAll: function(token) {
+    var args = {
+      token: token,
+      seq_no: 0,
+      resource_types: ['all']
+    };
+
+    return httpsGet(todoistURL(args))
+      .then(JSON.parse)
+      .catch(function(err){
+        console.error("ERR "+err);
+      });
   }
+
 };

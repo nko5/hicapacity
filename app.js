@@ -9,8 +9,11 @@ var User = require("./models/users.js");
 var RegistrationToken = require("./models/registration_tokens.js");
 var app = express();
 var todoist = require("./todoist.js");
+var _ = require("lodash");
 
 var baseUrl = process.env.BASE_URL;
+
+
 
 // Connect to database
 mongoose.connect(process.env.MONGO_URI);
@@ -131,8 +134,18 @@ function handle_list(req, res, user) {
 }
 
 function handle_projects(req, res, user) {
-  respond(res, 'Requesting projects');
-  // data = todoist.getProjects(user.todoist_oauth_token);
+//  respond(res, 'Requesting projects');
+
+  todoist.getAll(debug_token)
+    .then(function(data){
+      var projects = _.pluck(data.Projects, "name");
+      var text = projects.join("\n");
+      respond(res, text);
+      //console.log("projects: "+projects.join("\n"));
+    })
+  ;
+
+  //var data = todoist.getAll(user.todoist_oauth_token);
 
 }
 
@@ -203,7 +216,18 @@ app.get('/happyface', function(req, res) {
   res.sendfile(__dirname + '/happyface.html');
 });
 
-todoist.itemAdd("2c81a9dabb36ecdecdccd23c9e8651f4d9af8959", "DEBUG: app started "+(new Date().toISOString()));
+
+var debug_token = process.env.DEBUG_TODOIST_TOKEN;
+if(debug_token) {
+  todoist.itemAdd(debug_token, "DEBUG: app started "+(new Date().toISOString()));
+  todoist.getAll(debug_token)
+    .then(function(data){
+      var projects = _.pluck(data.Projects, "name");
+      console.log("projects: "+projects.join("\n"));
+    })
+  ;
+
+}
 
 var port = process.env.PORT || 8080;
 app.listen(port);
