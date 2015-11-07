@@ -8,7 +8,7 @@ var RegistrationToken = require("./models/registration_tokens.js");
 var app = express();
 var todoist = require("./todoist.js");
 
-var baseUrl = process.env.BASE_URL || "http://slacklemore-55043.onmodulus.net/";
+var baseUrl = process.env.BASE_URL;
 
 // Connect to database
 mongoose.connect(process.env.MONGO_URI);
