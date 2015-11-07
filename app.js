@@ -11,6 +11,7 @@ mongoose.connection.on('error', function(err) {
 	console.error('MongoDB connection error: ' + err);
 	process.exit(-1);
 });
+mongoose.set('debug', true);
 
 passport.use(new OAuth2Strategy({
   authorizationURL: 'https://todoist.com/oauth/authorize',
@@ -40,17 +41,17 @@ app.configure(function() {
 });
 
 app.post('/slash', function(req, res) {
-  console.log("Entering slash");
   var slack_id = req.body.user_id;
   User.findOne({ 'slack_id': slack_id }, function (err, user) {
-    if (err) {
+    if (err) { }
+    if (user) {
+      console.log("Found user");
+      // TODOIST CALL HERE
+    } else {
       console.log("Can't find slack_id: " + slack_id);
       var text = 'https://slacklemore-55043.onmodulus.net/todoist?slack_id=' + slack_id;
       res.writeHead(200, "OK", {'Content-Type': 'text/html'});
       res.end(text);
-    } else if (user) {
-      console.log("Found user");
-      // TODOIST CALL HERE
     }
   });
 });
@@ -68,8 +69,6 @@ app.get('/auth/callback',
   passport.authenticate('oauth2', { failureRedirect: '/sadface' }),
   function(req, res) {
     console.log("SUCCESSFULLY SAVED");
-    // Successful authentication.
-    // 1. Save slack id -> token.
     // 2. Show magic page
     // 3. If time, use slack-notify to message you that you're good to go
     res.redirect('/');
