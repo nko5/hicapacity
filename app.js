@@ -62,6 +62,7 @@ app.configure(function() {
 app.post('/slash', function(req, res) {
   var slack_id = req.body.user_id;
   User.findOne({ 'slack_id': slack_id }, function (err, user) {
+
     if (err) { }
     var text;
 
@@ -73,14 +74,14 @@ app.post('/slash', function(req, res) {
     }
 
     switch(command.toLowerCase()) {
-    case 'register':
-      text = "Register at" + baseUrl + 'todoist?slack_id=' + slack_id;
-      break;
+      case 'register':
+        text = "Register at" + baseUrl + 'todoist?slack_id=' + slack_id;
+        break;
 
-    case 'add':
-    default:
-      text = 'Adding "' + req.body.text + '" to todoist.com';
-      todoist.itemAdd(req.body.text, user.todoist_oauth_token);
+      case 'add':
+      default:
+        text = 'Adding "' + req.body.text + '" to todoist.com';
+        todoist.itemAdd(req.body.text, user.todoist_oauth_token);
     }
 
     text += "\n\nDEBUG command="+command+"\nuser="+JSON.stringify(user);
@@ -105,7 +106,6 @@ app.get('/auth', passport.authenticate('oauth2'));
 app.get('/auth/callback',
   passport.authenticate('oauth2', { failureRedirect: '/sadface' }),
   function(req, res) {
-    console.log("SUCCESSFULLY SAVED");
     // 2. Show magic page
     // 3. If time, use slack-notify to message you that you're good to go
     res.redirect('/');
