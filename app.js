@@ -6,11 +6,13 @@ var mongoose = require('mongoose');
 var app = express();
 
 passport.use(new OAuth2Strategy({
-  authorizationURL: 'https://todoist.com/oauth/authorize?scope=task:add,data:read&state=slacklemore&client_id' + process.env.CLIENT_ID_TODOIST,
+  authorizationURL: 'https://todoist.com/oauth/authorize',
   tokenURL: 'https://todoist.com/oauth/access_token',
   clientID: process.env.CLIENT_ID_TODOIST,
   clientSecret: process.env.CLIENT_SECRET_TODOIST,
-  callbackURL: "http://slacklemore-55043.onmodulus.net/auth/callback"},
+  callbackURL: 'http://slacklemore-55043.onmodulus.net/auth/callback',
+  scope: 'task:add,data:read',
+  state: 'slacklemore'},
   function(accessToken, refreshToken, profile, done) {
     console.log("accessToken:" + accessToken);
     console.log("refreshToken:" + refreshToken);
