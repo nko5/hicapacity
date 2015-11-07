@@ -1,6 +1,8 @@
 var express = require('express');
 var passport = require('passport');
 var OAuth2Strategy= require('passport-oauth2').Strategy;
+var User = require("./models/users.js");
+var mongoose = require('mongoose');
 var app = express();
 
 passport.use(new OAuth2Strategy({
@@ -10,9 +12,9 @@ passport.use(new OAuth2Strategy({
   clientSecret: process.env.CLIENT_SECRET_TODOIST,
   callbackURL: "http://slacklemore-55043.onmodulus.net/auth/callback"},
   function(accessToken, refreshToken, profile, done) {
-    User.findOrCreate({ exampleId: profile.id }, function (err, user) {
-      return done(err, user);
-    });
+    console.log("accessToken:" + accessToken);
+    console.log("refreshToken:" + refreshToken);
+    console.log("profile:" + profile);
   }
 ));
 
@@ -28,7 +30,7 @@ app.post('/slash', function(req, res) {
 app.get('/auth', passport.authenticate('oauth2'));
 
 app.get('/auth/callback',
-  passport.authenticate('oauth2', { failureRedirect: '/login' }),
+  passport.authenticate('oauth2', { failureRedirect: '/sadface' }),
   function(req, res) {
     // Successful authentication.
     // 1. Save slack id -> token.
@@ -36,6 +38,10 @@ app.get('/auth/callback',
     // 3. If time, use slack-notify to message you that you're good to go
     res.redirect('/');
   });
+
+app.get('/sadface', function(req, res) {
+
+});
 
 var port = 8080;
 app.listen(port);
