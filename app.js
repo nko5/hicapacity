@@ -1,6 +1,6 @@
 var express = require('express');
 var passport = require('passport');
-var Oauth2Strategy= require('passport-oauth2').Strategy;
+var OAuth2Strategy= require('passport-oauth2').Strategy;
 var app = express();
 
 passport.use(new OAuth2Strategy({
