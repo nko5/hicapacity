@@ -25,7 +25,10 @@ app.configure(function() {
 });
 
 app.post('/slash', function(req, res) {
-
+  // 1. Get slack id from req.
+  // 2. Use slack id to look up access token in the database.
+  // 3. If found, send command over to todoist.
+  // 4. If not found, send user the following url.
 });
 
 // OAuth stuffs
