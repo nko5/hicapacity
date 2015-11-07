@@ -22,11 +22,10 @@ passport.use(new OAuth2Strategy({
   state: 'slacklemore',
   passReqToCallback: true},
   function(request, accessToken, refreshToken, profile, done) {
-    console.log("request:" + JSON.stringify(request));
-    console.log("accessToken:" + accessToken);
-    console.log("refreshToken:" + refreshToken);
-    console.log("profile:" + JSON.stringify(profile));
-    done();
+    var slack_id = request.session.slack_id;
+    User.findOneAndUpdate({ slack_id: slack_id}, {todoist_oauth_token: accessToken}, {upsert:true}, function(err, user) {
+      return done(err, user);
+    });
   }
 ));
 
@@ -53,6 +52,7 @@ app.get('/auth', passport.authenticate('oauth2'));
 app.get('/auth/callback',
   passport.authenticate('oauth2', { failureRedirect: '/sadface' }),
   function(req, res) {
+    console.log("SUCCESSFULLY SAVED");
     // Successful authentication.
     // 1. Save slack id -> token.
     // 2. Show magic page
