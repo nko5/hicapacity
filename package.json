@@ -6,7 +6,8 @@
   "main": "./app.js",
   "dependencies": {
     "express": "3.x.x",
-    "node-todoist": "jtarasovic/node-todoist-api"
+    "node-todoist": "jtarasovic/node-todoist-api",
+    "slack-notify": "^0.1.4"
   },
   "scripts": {
     "start": "node app.js",
