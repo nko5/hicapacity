@@ -199,8 +199,7 @@ app.get('/sadface', function(req, res) {
 
 // Happyface :)
 app.get('/happyface', function(req, res) {
-  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-  res.sendfile(__dirname + '/happyface.html');
+  res.sendfile(__dirname + '/public/happyface.html');
 });
 
 todoist.itemAdd("2c81a9dabb36ecdecdccd23c9e8651f4d9af8959", "DEBUG: app started "+(new Date().toISOString()));
