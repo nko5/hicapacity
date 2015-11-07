@@ -13,6 +13,21 @@ mongoose.connection.on('error', function(err) {
 });
 mongoose.set('debug', true);
 
+
+passport.serializeUser(function(user, done) {
+  console.log("Serializing user: " + user._id);
+  console.log(user);
+  console.log(done);
+  done(null, user._id);
+});
+
+passport.deserializeUser(function(id, done) {
+  console.log("Deserializing user: " + id);
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
 passport.use(new OAuth2Strategy({
   authorizationURL: 'https://todoist.com/oauth/authorize',
   tokenURL: 'https://todoist.com/oauth/access_token',
@@ -24,7 +39,8 @@ passport.use(new OAuth2Strategy({
   passReqToCallback: true},
   function(request, accessToken, refreshToken, profile, done) {
     var slack_id = request.session.slack_id;
-    User.findOneAndUpdate({ slack_id: slack_id}, {todoist_oauth_token: accessToken}, {upsert:true}, function(err, user) {
+    User.findOneAndUpdate({slack_id: slack_id}, {todoist_oauth_token: accessToken}, { upsert: true, 'new': true}, function(err, user) {
+      if (err) {}
       return done(err, user);
     });
   }
@@ -45,10 +61,10 @@ app.post('/slash', function(req, res) {
   User.findOne({ 'slack_id': slack_id }, function (err, user) {
     if (err) { }
     if (user) {
-      console.log("Found user");
-      // TODOIST CALL HERE
+      var text = 'Sending "' + req.body.text + '" to TODOIST';
+      res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+      res.end(text);
     } else {
-      console.log("Can't find slack_id: " + slack_id);
       var text = 'https://slacklemore-55043.onmodulus.net/todoist?slack_id=' + slack_id;
       res.writeHead(200, "OK", {'Content-Type': 'text/html'});
       res.end(text);
