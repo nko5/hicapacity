@@ -3,6 +3,7 @@ var passport = require('passport');
 var OAuth2Strategy= require('passport-oauth2').Strategy;
 var mongoose = require('mongoose');
 var User = require("./models/users.js");
+//var querystring = require('querystring');
 var app = express();
 
 // Connect to database
@@ -37,11 +38,31 @@ app.configure(function() {
   app.use(express.static(__dirname + '/public'));
 });
 
-app.post('/slash', function(req, res) {
+
+
+/*
+function slackSlash(req, res){
+  var body = querystring.parse(req.body);
+  var text = "/slash body: "+JSON.stringify(body);
+  console.log(text);
+
+  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+  res.end(text);
+}
+*/
+
+app.post('/slash', function(req, res){
   // 1. Get slack id from req.
   // 2. Use slack id to look up access token in the database.
   // 3. If found, send command over to todoist.
   // 4. If not found, send user the following url
+  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+  var text = "";
+  text += "body: " + JSON.stringify(req.body);
+  text += "\nparams: " + JSON.stringify(req.params);
+
+  console.log(text);
+  res.end(text);
 });
 
 // OAuth stuffs
