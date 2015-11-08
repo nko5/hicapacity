@@ -13,6 +13,7 @@
     "node-uuid": "^1.4.3",
     "passport": "^0.3.0",
     "passport-oauth2": "^1.1.2",
+    "passport-slack": "0.0.4",
     "q": "^1.4.1",
     "restler": "^3.4.0",
     "slack-notify": "^0.1.4",
