@@ -11,7 +11,7 @@
     "mongoose": "^4.2.4",
     "node-todoist": "jtarasovic/node-todoist-api",
     "node-uuid": "^1.4.3",
-    "passport": "^0.3.0",
+    "passport": "^0.2.2",
     "passport-oauth2": "^1.1.2",
     "passport-slack": "0.0.4",
     "q": "^1.4.1",

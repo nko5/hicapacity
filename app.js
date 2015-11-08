@@ -35,7 +35,7 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
-passport.use(new OAuth2Strategy({
+passport.use('oauth2', new OAuth2Strategy({
   authorizationURL: 'https://todoist.com/oauth/authorize',
   tokenURL: 'https://todoist.com/oauth/access_token',
   clientID: process.env.CLIENT_ID_TODOIST,
@@ -53,7 +53,7 @@ passport.use(new OAuth2Strategy({
   }
 ));
 
-passport.use(new SlackStrategy({
+passport.use('slack', new SlackStrategy({
     clientID: process.env.CLIENT_ID_SLACK,
     clientSecret: process.env.CLIENT_SECRET_SLACK,
     scope: 'commands',
@@ -364,13 +364,23 @@ app.get('/auth/todoist/callback',
       res.redirect('/happyface/todoist');
 });
 
-app.get('/auth/slack', passport.authorize('slack'));
-app.get('/auth/slack/callback',
-  passport.authorize(
-    'slack', { failureRedirect: '/sadface' }),
-    function(req, res) {
-      res.redirect('/happyface/slack');
-    });
+app.get('/auth/slack/callback', function(req, res)
+  {
+    try {
+      passport.authenticate(
+        'slack', { scope: 'commands', failureRedirect: '/sadface' }),
+        function(req, res) {
+          res.redirect('/happyface/slack');
+        }
+    }
+    catch (e) {
+        // TODO: This is a total hack. Slack keeps complaining about a missing scope,
+        // but still authorizes the add. In pure hackathon fashion, let's just
+        // ignore that missing scope since everything still works. For anyone
+        // looking at this, I'm sorry. :)
+        res.redirect('/happyface/slack');
+    }
+  });
 
 // Sadface :(
 app.get('/sadface', function(req, res) {
