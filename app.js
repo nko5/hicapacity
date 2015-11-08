@@ -10,6 +10,7 @@ var RegistrationToken = require("./models/registration_tokens.js");
 var app = express();
 var todoist = require("./todoist.js");
 var _ = require("lodash");
+var Q = require("q");
 
 var baseUrl = process.env.BASE_URL;
 
@@ -73,6 +74,19 @@ function respond(res, text) {
 }
 
 
+function richResponse(res, text) {
+  respond(res, {
+    text: text,
+    color: "#000000",
+    attachments: [
+      {
+        color: "#22FF44",
+        text: "wow, much attachment"
+      }]
+  });
+}
+
+
 function handle_register(req, res, user) {
   console.log(">>>> In register handler");
 
@@ -105,15 +119,23 @@ function handle_unregister(req, res, user) {
 
 
 function handle_add(req,res,user) {
-  // This isn't right. We need a callback somewhere in case an error happens.
-  var text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
-  todoist.itemAdd(user.todoist_oauth_token, req.body.text);
-  respond(res, {
+  //// This isn't right. We need a callback somewhere in case an error happens.
+  //var text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
+
+  respond(res, `Adding ${req.body.text} to your Inbox @ todoist.com` + JSON.stringify(req.body,2,2));
+  /*{
     text: text,
     attachments: [
       {
         text: "wow, much attachment"
       }]
+  });
+   */
+  var token = user.todoist_oauth_token;
+  var text = req.body.text;
+
+  Q.spawn(function* () {
+    var result = yield todoist.itemAdd(token, text);
   });
 }
 
@@ -223,10 +245,17 @@ app.get('/happyface', function(req, res) {
   res.sendfile(__dirname + '/public/happyface.html');
 });
 
+function* logall() {
+  var token = process.env.DEBUG_TODOIST_TOKEN;
+  var json = yield todoist.getAll(token);
+  console.log(JSON.stringify(json.Projects, 2,2));
+}
+
 
 var debug_token = process.env.DEBUG_TODOIST_TOKEN;
 if(debug_token) {
   todoist.itemAdd(debug_token, "@DEBUG app started "+(new Date().toISOString()));
+  Q.spawn(logall);
 }
 
 var port = process.env.PORT || 8080;

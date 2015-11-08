@@ -61,45 +61,34 @@ function todoistItemAdd(token, content) {
   var text = strip_labels_from_text(content);
 
   return todoistGetAllPromise(token)
-    .then(function(data) {
-      return get_label_ids_from_labels(labels, data);
-    })
-    .then(function(label_ids) {
-      var args = {
-        token: token,
-        commands: [{
-          type: "item_add",
-          temp_id: uuid.v4(),
-          uuid: uuid.v4(),
-          args: {
-            content: text,
-            labels: label_ids
-          }
-        }]};
-
-      httpsGet(todoistURL(args))
-        .then(console.log.bind(console))
-        .catch(function(err){
-          console.error("Error adding item "+err);
-        });
-    })
+    .then(extractLabelIDs)
+    .then(itemAdd)
     .catch(function(err){
-      console.log("ERR in itemAdd:"+err);
+      console.error("Caught error itemAdd:"+err);
     });
-}
 
-/*
-  var url = todoistCommandURL('item_add', {content: content}, token);
 
-  todoist(url,
-          function(d) {
-            process.stdout.write(d);
-          },
-          function(err) {
-            console.log("something went wrong w/ httpsGet!");
-          });
+  function extractLabelIDs(data) {
+    return get_label_ids_from_labels(labels, data);
+  }
+
+  function itemAdd(label_ids) {
+    var args = {
+      token: token,
+      commands: [{
+        type: "item_add",
+        temp_id: uuid.v4(),
+        uuid: uuid.v4(),
+        args: {
+          content: text,
+          labels: label_ids
+        }
+      }]};
+
+    return httpsGet(todoistURL(args));
+  }
+
 }
-*/
 
 
 function strip_labels_from_text(text) {
@@ -163,6 +152,6 @@ function todoistGetAllPromise(token) {
   return httpsGet(todoistURL(args))
     .then(JSON.parse)
     .catch(function(err){
-      console.error("ERR "+err);
+      console.error("todoistGetAll "+err);
     });
 }
