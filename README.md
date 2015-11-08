@@ -57,3 +57,9 @@ Once set, update the URL for the slash command on Slack.com to fit the URL of yo
 If you have feedback of any kind (you know, to tell us how awesome we are), we're easily found on the Twitters - [@mckayhdavis](https://twitter.com/mckayhdavis) [@ryankanno](https://twitter.com/ryankanno)
 
 ![DoAllTheThings](http://www.puravidamultimedia.com/wp-content/uploads/2013/09/image.png)
+
+## Why did you write the code this way?
+
+Because Internet. Also, because we're not actually Javascript developers. With
+that said, we'd love to take pull requests from all you amazing people out
+there.
