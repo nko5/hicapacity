@@ -24,3 +24,4 @@
 - [ ] GIF Slack.com: /todo @buy dad b-day gift
 - [ ] GIF Todoist.com: inbox item of 'buy dad b-day gift' animation poping in
 - [ ] Deploy to Heroku
+- [ ] Hookup email capture or take out
