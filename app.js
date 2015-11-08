@@ -332,7 +332,7 @@ app.get('/todoist/:hash', function(req, res) {
     if (err) { console.error('Finding Registration Token error: ' + err); }
     if (token && token.valid_until > new Date()) {
       req.session.slack_id = token.slack_id;
-      res.redirect('/auth');
+      res.redirect('/auth/todoist');
     } else {
       respond(res, 'Unable to find your registration token, please try again');
     }
