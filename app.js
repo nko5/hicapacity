@@ -132,7 +132,9 @@ function handle_register(req, res, user) {
   var valid_until = now.setTime(now.getTime() + days_valid * 86400000);
   RegistrationToken.findOneAndUpdate({slack_id: slack_id}, {registration_hash: registration_hash, valid_until: valid_until}, { upsert: true, 'new': true}, function(err, token) {
     if (err) { console.error('Finding / Updating Registration Token error: ' + err); }
-    var text = "Don't think we've seen you before. Please register @ " + baseUrl + 'todoist/' + token.registration_hash;
+    var link = baseUrl + 'todoist/' + token.registration_hash;
+    var text = ["Welcome to Slash Todoist! It looks like we've not seen you before.",
+                `<${link}|Please click here to link to your todoist.com account>`].join("\n");
     respond(res, text);
   });
 }
