@@ -146,7 +146,7 @@ function handle_add(req,res,user) {
   var text = `Adding "${req.body.text}" to your Inbox @ todoist.com`;
 
   //text += "\n" + JSON.stringify(req.body,2,2);
-  //text += "\n response_url="+response_url;
+  text += "\n response_url="+response_url;
   respond(res,  text);
 
   var token = user.todoist_oauth_token;
@@ -155,7 +155,7 @@ function handle_add(req,res,user) {
   Q.spawn(function* () {
     var result = yield todoist.itemAdd(token, item_text);
 
-    postJSON(req.body.response_url, { text: "The result was\n"+JSON.stringify(result) });
+    //postJSON(req.body.response_url, { text: "The result was\n"+JSON.stringify(result) });
 
 
   });
@@ -182,14 +182,36 @@ function filterItemsDueInLessThanNDays(items, ndays) {
 
 
 function buildItemsDueResponseJSON(items){
+  var json = {
+    attachments: []
+  };
   var text = [];
   for(var i = 0, n = items.length; i < n; ++i){
-    text.push(`${items[i].date_string}: ${items[i].content}`);
+    var item = items[i];
+    var content = `${item.date_string}: ${item.content}`;
+    var link = `https://todoist.com/showTask?id=${item.id}`;
+    var txt = `${item.date_string} - <${link}|${item.content}>`;
+    text.push(txt);
+
+    json.attachments.push(
+      {
+        title: content,
+        title_link: link,
+        text: txt,
+        fallback: content
+      }
+    );
   }
 
-  return {
-    text: text.join("\n")
-  };
+  json.text = text.join("\n");
+
+  // comment out to get attachments
+  json.attachments = null;
+
+  console.log("JSON="+JSON.stringify(json,2,2));
+
+  return json;
+
 };
 
 
@@ -209,13 +231,13 @@ function respondDueItems(token, response_url, ndays){
 
 
 function handle_today(req, res, user) {
-  respond(res, "Today");
+  respond(res, "Due by Today");
   respondDueItems(user.todoist_oauth_token, req.body.response_url, 1);
 }
 
 
 function handle_week(req, res, user) {
-  respond(res, "Week");
+  respond(res, "Due in next week");
   respondDueItems(user.todoist_oauth_token, req.body.response_url, 7);
 }
 
@@ -325,8 +347,10 @@ var debug_token = process.env.DEBUG_TODOIST_TOKEN;
 if(debug_token) {
   todoist.itemAdd(debug_token, "@DEBUG app started "+(new Date().toISOString()));
   Q.spawn(logall);
-  var debug_response_url = "https://hooks.slack.com/commands/T02AS3PAA/14116892545/E2NiFSYgqcNwP0gMkcmSyVOy";
-  respondDueItems(debug_token, debug_response_url, 7);
+  
+  if(process.env.DEBUG_SLACK_RESPONSE_URL) {
+    respondDueItems(debug_token, process.env.DEBUG_SLACK_RESPONSE_URL, 7);
+  }
 }
 
 var port = process.env.PORT || 8080;

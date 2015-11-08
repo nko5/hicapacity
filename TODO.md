@@ -9,7 +9,7 @@
 [X] Icon
 [X] /todoist today (get everything due today)
 [X] /todist week/7 (get everything due in next week)
-[X] /todist list (get everything due from a project/Inbox)
+[ ] /todist list (get everything due from a project/Inbox)
 [ ] Configure Slack Button https://api.slack.com/docs/slack-button
   [ ] OAuth for Slack https://github.com/mjpearson/passport-slack
 [ ] Return nicer annotated responses
