@@ -20,6 +20,8 @@ this yourself because honestly, we're developers and that's what we do. :)
  - The callback command should be at http://<whereever.you.installed.com>/slash
  - Tell slack to use the POST method
 
+ Your integration should look like below.
+
 ![Should look like this](public/img/configure.png)
 
 2. Add the integration
