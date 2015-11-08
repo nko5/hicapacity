@@ -137,7 +137,7 @@ function handle_list(req, res, user) {
 function handle_labels(req, res, user) {
   todoist.getAll(user.todoist_oauth_token)
     .then(function(data){
-      var text = data.Labels.join(", ");
+      var text = JSON.stringify(data);//.Labels.join(", ");
       respond(res, text);
     })
     .done();
@@ -223,13 +223,15 @@ app.get('/happyface', function(req, res) {
 
 var debug_token = process.env.DEBUG_TODOIST_TOKEN;
 if(debug_token) {
-  todoist.itemAdd(debug_token, "DEBUG: app started "+(new Date().toISOString()));
+//  todoist.itemAdd(debug_token, "DEBUG: app started "+(new Date().toISOString()));
+  todoist.itemAdd(debug_token, "DEBUG: @Urgent app @later started "+(new Date().toISOString()));
+  /*
   todoist.getAll(debug_token)
     .then(function(data){
-      var projects = _.pluck(data.Projects, "name");
-      console.log("projects: "+projects.join("\n"));
+      console.log("ALL: "+JSON.stringify(_.pluck(data.Labels, "name"),2,2));
     })
   ;
+*/
 
 }
 
