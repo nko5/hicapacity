@@ -20,6 +20,8 @@ this yourself because honestly, we're developers and that's what we do. :)
  - The callback command should be at http://<whereever.you.installed.com>/slash
  - Tell slack to use the POST method
 
+![Should look like this](public/img/configure.png)
+
 2. Add the integration
 
 Once configured, you'll be able to get your Todos over to [Todoist](https://todoist.com)
