@@ -16,16 +16,13 @@ var https = require("https");
 
 var baseUrl = process.env.BASE_URL;
 
-
-
 // Connect to database
 mongoose.connect(process.env.MONGO_URI);
 mongoose.connection.on('error', function(err) {
-	console.error('MongoDB connection error: ' + err);
-	process.exit(-1);
+  console.error('MongoDB connection error: ' + err);
+  process.exit(-1);
 });
 mongoose.set('debug', true);
-
 
 passport.serializeUser(function(user, done) {
   done(null, user._id);
@@ -49,7 +46,7 @@ passport.use(new OAuth2Strategy({
   function(request, accessToken, refreshToken, profile, done) {
     var slack_id = request.session.slack_id;
     User.findOneAndUpdate({slack_id: slack_id}, {todoist_oauth_token: accessToken}, { upsert: true, 'new': true}, function(err, user) {
-      if (err) { console.error('Finding / Updating User error: ' + err); }
+      if (err) { console.error('Finding / Updating User Todoist error: ' + err); }
       return done(err, user);
     });
   }
@@ -106,7 +103,6 @@ function postJSON(url, json){
   });
 
   req.end(body);
-
 }
 
 
@@ -215,7 +211,6 @@ function buildItemsDueResponseJSON(items){
 };
 
 
-
 function respondDueItems(token, response_url, ndays){
   Q.spawn(function* () {
     var json = yield todoist.getAll(token);
@@ -256,7 +251,6 @@ function respondListProjectItems(token, response_url, project){
 
   });
 }
-
 
 
 function handle_today(req, res, user) {
@@ -346,23 +340,22 @@ app.get('/todoist/:hash', function(req, res) {
 });
 
 // OAuth stuffs
-app.get('/auth', passport.authenticate('oauth2'));
-
-app.get('/auth/callback',
+app.get('/auth/todoist', passport.authenticate('oauth2'));
+app.get('/auth/todoist/callback',
   passport.authenticate(
     'oauth2', { failureRedirect: '/sadface' }),
     function(req, res) {
-      res.redirect('/happyface');
+      res.redirect('/happyface/todoist');
 });
 
 // Sadface :(
 app.get('/sadface', function(req, res) {
-  respond(res, ':(');
+  respond(res, 'Something bad happened. Robot overlords have been notified. :(');
 });
 
 // Happyface :)
-app.get('/happyface', function(req, res) {
-  res.sendfile(__dirname + '/public/happyface.html');
+app.get('/happyface/todoist', function(req, res) {
+  res.sendfile(__dirname + '/public/happyface_todoist.html');
 });
 
 // Help, Yo
