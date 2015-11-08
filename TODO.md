@@ -8,7 +8,9 @@
 [X] /todist projects to list all projects
 [ ] /todoist today (get everything due today)
 [ ] /todist week/7 (get everything due in next week)
+[ ] Return nicer annotated responses 
 [X] support parsing text and adding label ids
 [ ] Icon
 [ ] Configure Slack Button
 [ ] Deploy to Heroku
+[ ] add Fork Me On Github Ribbon https://codepo8.github.io/css-fork-on-github-ribbon/
