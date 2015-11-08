@@ -70,7 +70,6 @@ function respond(res, text) {
 }
 
 
-
 function handle_register(req, res, user) {
   console.log(">>>> In register handler");
 
