@@ -60,7 +60,7 @@ function todoistItemAdd(token, content) {
   var labels = get_labels_from_text(content);
   var text = strip_labels_from_text(content);
 
-  todoistGetAllPromise(token)
+  return todoistGetAllPromise(token)
     .then(function(data) {
       return get_label_ids_from_labels(labels, data);
     })

@@ -64,8 +64,11 @@ app.configure(function() {
 
 
 function respond(res, text) {
+  var isJSON = (typeof text !== 'string');
+  var content_type = isJSON ? 'application/json' : 'text/html';
+  text = isJSON ? JSON.stringify(text) : text;
   console.log("Responding 200 OK with: " + text);
-  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+  res.writeHead(200, "OK", {'Content-Type': content_type});
   res.end(text);
 }
 
@@ -102,12 +105,16 @@ function handle_unregister(req, res, user) {
 
 
 function handle_add(req,res,user) {
-  console.log(">>>> In add handler");
-
   // This isn't right. We need a callback somewhere in case an error happens.
   var text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
   todoist.itemAdd(user.todoist_oauth_token, req.body.text);
-  respond(res, text);
+  respond(res, {
+    text: text,
+    attachments: [
+      {
+        text: "wow, much attachment"
+      }]
+  });
 }
 
 
