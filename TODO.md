@@ -3,8 +3,8 @@
 (In priority order)
 
 [X] Bootstrap theme template
+[X] Not sure why unregister not working - It's working.
 [ ] Fill in copy
-[ ] Not sure why unregister not working
 [X] /todist projects to list all projects
 [ ] /todoist today (get everything due today)
 [ ] /todist week/7 (get everything due in next week)

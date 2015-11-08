@@ -146,7 +146,7 @@ module.exports = {
   getList: function(token, project) {
     return {};
   },
-  getProjects: function(token,project) {
+  getProjects: function(token, project) {
     return {};
   },
   getAll: todoistGetAllPromise
