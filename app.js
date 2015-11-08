@@ -11,6 +11,8 @@ var app = express();
 var todoist = require("./todoist.js");
 var _ = require("lodash");
 var Q = require("q");
+var URL = require("url");
+var https = require("https");
 
 var baseUrl = process.env.BASE_URL;
 
@@ -87,6 +89,27 @@ function richResponse(res, text) {
 }
 
 
+function postJSON(url, json){
+  var body = JSON.stringify(json);
+  var options = URL.parse(url);
+  options.method = "POST";
+  options.headers = {
+    "Content-Type": "application/json",
+    "Content-Length": Buffer.byteLength(body)
+  };
+
+  var req = https.request(options, function(res) {
+    console.log(res.statusCode);
+    res.on('data', function(d) {
+      process.stdout.write(d);
+    });
+  });
+
+  req.end(body);
+
+}
+
+
 function handle_register(req, res, user) {
   console.log(">>>> In register handler");
 
@@ -119,45 +142,90 @@ function handle_unregister(req, res, user) {
 
 
 function handle_add(req,res,user) {
-  //// This isn't right. We need a callback somewhere in case an error happens.
-  //var text = 'Adding "' + req.body.text + '" to your Inbox @ todoist.com';
+  var response_url = req.body.response_url;
+  var text = `Adding "${req.body.text}" to your Inbox @ todoist.com`;
 
-  respond(res, `Adding ${req.body.text} to your Inbox @ todoist.com` + JSON.stringify(req.body,2,2));
-  /*{
-    text: text,
-    attachments: [
-      {
-        text: "wow, much attachment"
-      }]
-  });
-   */
+  //text += "\n" + JSON.stringify(req.body,2,2);
+  //text += "\n response_url="+response_url;
+  respond(res,  text);
+
   var token = user.todoist_oauth_token;
-  var text = req.body.text;
+  var item_text = req.body.text;
 
   Q.spawn(function* () {
-    var result = yield todoist.itemAdd(token, text);
+    var result = yield todoist.itemAdd(token, item_text);
+
+    postJSON(req.body.response_url, { text: "The result was\n"+JSON.stringify(result) });
+
+
   });
 }
 
 
+function filterItemsDueInLessThanNDays(items, ndays) {
+  var now_timestamp = Date.now();
+  var items_due = [];
+  for(var i = 0, n = items.length; i < n; ++i){
+    var item = items[i];
+    var due_date_str = item.due_date_utc;
+    if(due_date_str){
+      var due_timestamp = new Date(due_date_str);
+      var due_in = due_timestamp - now_timestamp;
+      var threshold = ndays * 24 * 60 * 60 * 1000;
+      if(due_in < threshold){
+        items_due.push(item);
+      }
+    }
+  }
+  return items_due;
+}
+
+
+function buildItemsDueResponseJSON(items){
+  var text = [];
+  for(var i = 0, n = items.length; i < n; ++i){
+    text.push(`${items[i].date_string}: ${items[i].content}`);
+  }
+
+  return {
+    text: text.join("\n")
+  };
+};
+
+
+
+function respondDueItems(token, response_url, ndays){
+  Q.spawn(function* () {
+    var json = yield todoist.getAll(token);
+
+    var items = filterItemsDueInLessThanNDays(json.Items, ndays);
+
+    var response_json = buildItemsDueResponseJSON(items);
+
+    postJSON(response_url, response_json);
+
+  });
+}
+
 
 function handle_today(req, res, user) {
-  respond(res, 'Requesting today');
-  // data = todoist.getToday(user.todoist_oauth_token);
+  respond(res, "Today");
+  respondDueItems(user.todoist_oauth_token, req.body.response_url, 1);
 }
 
 
 function handle_week(req, res, user) {
-  respond(res, 'Requesting week');
-  // data = todoist.getWeek(user.todoist_oauth_token);
-
+  respond(res, "Week");
+  respondDueItems(user.todoist_oauth_token, req.body.response_url, 7);
 }
+
 
 function handle_list(req, res, user) {
   respond(res, 'Requesting list');
   // data = todoist.getList(user.todoist_oauth_token);
 
 }
+
 
 function handle_labels(req, res, user) {
   todoist.getAll(user.todoist_oauth_token)
@@ -198,6 +266,7 @@ app.post('/slash', function(req, res) {
       add: handle_add,
       today: handle_today,
       week: handle_week,
+      [7]: handle_week,
       list: handle_list,
       projects: handle_projects,
       labels: handle_labels,
@@ -248,7 +317,7 @@ app.get('/happyface', function(req, res) {
 function* logall() {
   var token = process.env.DEBUG_TODOIST_TOKEN;
   var json = yield todoist.getAll(token);
-  console.log(JSON.stringify(json.Projects, 2,2));
+  console.log(JSON.stringify(json, 2,2));
 }
 
 
@@ -256,6 +325,8 @@ var debug_token = process.env.DEBUG_TODOIST_TOKEN;
 if(debug_token) {
   todoist.itemAdd(debug_token, "@DEBUG app started "+(new Date().toISOString()));
   Q.spawn(logall);
+  var debug_response_url = "https://hooks.slack.com/commands/T02AS3PAA/14116892545/E2NiFSYgqcNwP0gMkcmSyVOy";
+  respondDueItems(debug_token, debug_response_url, 7);
 }
 
 var port = process.env.PORT || 8080;
