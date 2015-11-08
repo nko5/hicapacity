@@ -36,6 +36,23 @@ Will either:
 
 ## Supported commands
 
+Here's the commands we completed for Node Knockout.
+
+- /todoist Send Node Knockout Judges pies @errands
+- /todoist projects
+- /todoist today
+- /todoist week
+- /todoist 7
+- /todoist list <project>
+- /todoist unregister
+
+## TODOS
+
+Ironically, we used http://todoist.com to track our todos, but since we can't
+make them public, we used our trusty text file editor instead.
+
+Check out our [TODOs](TODO.md)
+
 ## Feedback
 
 If you have feedback of any kind (you know, to tell us how awesome we are), we're easily found on the Twitters - [@mckayhdavis](https://twitter.com/mckayhdavis) [@ryankanno](https://twitter.com/ryankanno)
