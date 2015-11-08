@@ -13,6 +13,9 @@
 
 - [X] welcome message in slacktodoistdemo
 - [X] Fill in copy (in progress)
+
+- [ ] Analytics
+- [ ] Create new todoist app and reissue keys to reset # of tokens
 - [ ] Configure Slack Button https://api.slack.com/docs/slack-button (in progress)
  - [ ] OAuth for Slack https://github.com/mjpearson/passport-slack (in progress)
 - [ ] Return nicer annotated responses (in progress)
