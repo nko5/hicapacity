@@ -34,6 +34,8 @@ Will either:
 
 - If you're already registered, adds a Todo in your Inbox over at Todoist
 
+## Supported commands
+
 ## Feedback
 
 If you have feedback of any kind (you know, to tell us how awesome we are), we're easily found on the Twitters - [@mckayhdavis](https://twitter.com/mckayhdavis) [@ryankanno](https://twitter.com/ryankanno)
