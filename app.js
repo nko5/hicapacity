@@ -2,9 +2,8 @@
 
 var crypto = require("crypto");
 var express = require('express');
-var passport = require('passport');
+var passport = require("passport");
 var OAuth2Strategy= require('passport-oauth2').Strategy;
-var SlackStrategy= require('passport-slack').Strategy;
 var mongoose = require('mongoose');
 var User = require("./models/users.js");
 var RegistrationToken = require("./models/registration_tokens.js");
@@ -34,12 +33,12 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
-passport.use('oauth2', new OAuth2Strategy({
+passport.use('todoist', new OAuth2Strategy({
   authorizationURL: 'https://todoist.com/oauth/authorize',
   tokenURL: 'https://todoist.com/oauth/access_token',
   clientID: process.env.CLIENT_ID_TODOIST,
   clientSecret: process.env.CLIENT_SECRET_TODOIST,
-  callbackURL: baseUrl + 'auth/callback',
+  callbackURL: baseUrl + 'auth/todoist/callback',
   scope: 'task:add,data:read_write',
   state: 'slacklemore',
   passReqToCallback: true},
@@ -52,13 +51,17 @@ passport.use('oauth2', new OAuth2Strategy({
   }
 ));
 
-passport.use('slack', new SlackStrategy({
-    clientID: process.env.CLIENT_ID_SLACK,
-    clientSecret: process.env.CLIENT_SECRET_SLACK,
-    scope: 'identify,commands',
-    state: 'slacklemore'
-  },
+passport.use('slack', new OAuth2Strategy({
+  authorizationURL: 'https://slack.com/oauth/authorize',
+  tokenURL: 'https://slack.com/api/oauth.access',
+  clientID: process.env.CLIENT_ID_SLACK,
+  clientSecret: process.env.CLIENT_SECRET_SLACK,
+  callbackURL: 'https://nko2015-hicapacity-54610.onmodulus.net/auth/slack/callback',
+  scope: 'commands',
+  state: 'slacklemore'},
   function(accessToken, refreshToken, profile, done) {
+    console.log("HERE");
+    console.log(profile);
     User.findOneAndUpdate({slack_id: profile.id}, {slack_oauth_token: accessToken}, { upsert: true, 'new': true}, function(err, user) {
       if (err) { console.error('Finding / Updating User Slack error: ' + err); }
       return done(err, user);
@@ -367,10 +370,10 @@ app.get('/todoist/:hash', function(req, res) {
 });
 
 // OAuth stuffs
-app.get('/auth/todoist', passport.authenticate('oauth2'));
+app.get('/auth/todoist', passport.authenticate('todoist'));
 app.get('/auth/todoist/callback',
   passport.authenticate(
-    'oauth2', { failureRedirect: '/sadface' }),
+    'todoist', { failureRedirect: '/sadface' }),
     function(req, res) {
       res.redirect('/happyface/todoist');
 });

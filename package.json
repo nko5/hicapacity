@@ -6,6 +6,7 @@
   "main": "./app.js",
   "dependencies": {
     "body-parser": "^1.14.1",
+    "debug": "^2.2.0",
     "express": "3.x.x",
     "lodash": "^3.10.1",
     "mongoose": "^4.2.4",
