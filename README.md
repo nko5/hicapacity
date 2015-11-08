@@ -20,6 +20,10 @@ this yourself because honestly, we're developers and that's what we do. :)
  - The callback command should be at http://<whereever.you.installed.com>/slash
  - Tell slack to use the POST method
 
+ Your integration should look like below.
+
+![Should look like this](public/img/configure.png)
+
 2. Add the integration
 
 Once configured, you'll be able to get your Todos over to [Todoist](https://todoist.com)
@@ -35,6 +39,23 @@ Will either:
 - If you're already registered, adds a Todo in your Inbox over at Todoist
 
 ## Supported commands
+
+Here's the commands we completed for Node Knockout.
+
+- /todoist Send Node Knockout Judges pies @errands
+- /todoist projects
+- /todoist today
+- /todoist week
+- /todoist 7
+- /todoist list <project>
+- /todoist unregister
+
+## TODOS
+
+Ironically, we used http://todoist.com to track our todos, but since we can't
+make them public, we used our trusty text file editor instead.
+
+Check out our [TODOs](TODO.md)
 
 ## Feedback
 
