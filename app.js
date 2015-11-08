@@ -146,7 +146,7 @@ function handle_add(req,res,user) {
   var text = `Adding "${req.body.text}" to your Inbox @ todoist.com`;
 
   //text += "\n" + JSON.stringify(req.body,2,2);
-  text += "\n response_url="+response_url;
+  //text += "\n response_url="+response_url;
   respond(res,  text);
 
   var token = user.todoist_oauth_token;
@@ -190,7 +190,7 @@ function buildItemsDueResponseJSON(items){
     var item = items[i];
     var content = `${item.date_string}: ${item.content}`;
     var link = `https://todoist.com/showTask?id=${item.id}`;
-    var txt = `${item.date_string} - <${link}|${item.content}>`;
+    var txt = (item.date_string ? `${item.date_string} - ` : "") + `<${link}|${item.content}>`;
     text.push(txt);
 
     json.attachments.push(
@@ -229,6 +229,35 @@ function respondDueItems(token, response_url, ndays){
   });
 }
 
+function respondListProjectItems(token, response_url, project){
+  Q.spawn(function* () {
+    var json = yield todoist.getAll(token);
+
+    var i;
+    var project_id;
+
+    for(i = 0; i < json.Projects.length && !project_id; ++i){
+      if(json.Projects[i].name === project){
+        project_id = json.Projects[i].id;
+      }
+    }
+
+    var items = [];
+    for(i = 0; i < json.Items.length; ++i){
+      var item = json.Items[i];
+      if(item.project_id === project_id){
+        items.push(item);
+      }
+    }
+
+    var response_json = buildItemsDueResponseJSON(items);
+
+    postJSON(response_url, response_json);
+
+  });
+}
+
+
 
 function handle_today(req, res, user) {
   respond(res, "Due by Today");
@@ -243,9 +272,9 @@ function handle_week(req, res, user) {
 
 
 function handle_list(req, res, user) {
-  respond(res, 'Requesting list');
-  // data = todoist.getList(user.todoist_oauth_token);
-
+  var project = req.body.text.substr("list ".length) || "Inbox";
+  respond(res, 'List items in '+project);
+  respondListProjectItems(user.todoist_oauth_token, req.body.response_url, project);
 }
 
 
@@ -347,9 +376,10 @@ var debug_token = process.env.DEBUG_TODOIST_TOKEN;
 if(debug_token) {
   todoist.itemAdd(debug_token, "@DEBUG app started "+(new Date().toISOString()));
   Q.spawn(logall);
-  
+
   if(process.env.DEBUG_SLACK_RESPONSE_URL) {
-    respondDueItems(debug_token, process.env.DEBUG_SLACK_RESPONSE_URL, 7);
+    //respondDueItems(debug_token, process.env.DEBUG_SLACK_RESPONSE_URL, 7);
+    //respondListProjectItems(debug_token, process.env.DEBUG_SLACK_RESPONSE_URL, "Inbox");
   }
 }
 
