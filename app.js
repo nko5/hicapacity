@@ -56,7 +56,8 @@ passport.use(new OAuth2Strategy({
 passport.use(new SlackStrategy({
     clientID: process.env.CLIENT_ID_SLACK,
     clientSecret: process.env.CLIENT_SECRET_SLACK,
-    scope: 'commands'
+    scope: 'commands',
+    state: 'slacklemore'
   },
   function(accessToken, refreshToken, profile, done) {
     User.findOneAndUpdate({slack_id: profile.id}, {slack_oauth_token: accessToken}, { upsert: true, 'new': true}, function(err, user) {
