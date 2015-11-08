@@ -157,7 +157,14 @@ function handle_unregister(req, res, user) {
 
 function handle_add(req,res,user) {
   var response_url = req.body.response_url;
-  var text = `Adding "${req.body.text}" to your Inbox @ todoist.com`;
+  var item = req.body.text;
+
+  if(item.substr(0,4).toLowerCase() == "add "){
+    item = item.substr(4);
+  }
+
+  var link = "https://todoist.com/app";
+  var text = `Adding "${req.body.text}" in your <${link}|todoist Inbox>`;
 
   //text += "\n" + JSON.stringify(req.body,2,2);
   //text += "\n response_url="+response_url;
@@ -168,10 +175,7 @@ function handle_add(req,res,user) {
 
   Q.spawn(function* () {
     var result = yield todoist.itemAdd(token, item_text);
-
     //postJSON(req.body.response_url, { text: "The result was\n"+JSON.stringify(result) });
-
-
   });
 }
 
