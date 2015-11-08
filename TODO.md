@@ -17,6 +17,7 @@
 - [ ] Return nicer annotated responses (in progress)
 - [ ] Make a LICENSE
 - [ ] Cleanup repo and make public
+- [ ] make favicon.ico
 - [ ] Fill help page copy
 - [ ] Add list of help command gifs to signup success happyfacehtml (and to help page above)
 - [ ] Side-by-side animated gify of slack window and todoist window showing workflow
