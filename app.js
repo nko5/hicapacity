@@ -365,6 +365,11 @@ app.get('/happyface', function(req, res) {
   res.sendfile(__dirname + '/public/happyface.html');
 });
 
+// Help, Yo
+app.get('/help', function(req, res) {
+  res.sendfile(__dirname + '/public/help.html');
+});
+
 function* logall() {
   var token = process.env.DEBUG_TODOIST_TOKEN;
   var json = yield todoist.getAll(token);
