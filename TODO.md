@@ -16,7 +16,7 @@
 - [X] Return nicer annotated responses
 - [X] make favicon.ico
 
-- [ ] Create new todoist app and reissue keys to reset # of tokens
+
 - [ ] Configure Slack Button https://api.slack.com/docs/slack-button (in progress)
  - [ ] OAuth for Slack https://github.com/mjpearson/passport-slack (in progress)
 
@@ -29,3 +29,4 @@
  - [ ] Side-by-side animated gify of slack window and todoist window showing workflow
  - [ ] GIF Slack.com: /todo @buy dad b-day gift
  - [ ] GIF Todoist.com: inbox item of 'buy dad b-day gift' animation poping in
+- [ ] Create new todoist app and reissue keys to reset # of tokens
