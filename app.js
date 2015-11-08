@@ -250,7 +250,7 @@ function respondListProjectItems(token, response_url, project){
     var project_id;
 
     for(i = 0; i < json.Projects.length && !project_id; ++i){
-      if(json.Projects[i].name === project){
+      if(json.Projects[i].name.toLowerCase() === project.toLowerCase()){
         project_id = json.Projects[i].id;
       }
     }
