@@ -64,7 +64,7 @@ app.configure(function() {
 
 
 function respond(res, text) {
-  console.log("Responding 200 OK with: "+text);
+  console.log("Responding 200 OK with: " + text);
   res.writeHead(200, "OK", {'Content-Type': 'text/html'});
   res.end(text);
 }
@@ -81,8 +81,7 @@ function handle_register(req, res, user) {
   RegistrationToken.findOneAndUpdate({slack_id: slack_id}, {registration_hash: registration_hash, valid_until: valid_until}, { upsert: true, 'new': true}, function(err, token) {
     if (err) { console.error('Finding / Updating Registration Token error: ' + err); }
     var text = "Don't think we've seen you before. Please register @ " + baseUrl + 'todoist/' + token.registration_hash;
-    res.writeHead(200, 'OK', {'Content-Type': 'text/html'});
-    res.end(text);
+    respond(res, text);
   });
 }
 
@@ -93,13 +92,11 @@ function handle_unregister(req, res, user) {
     User.remove({ _id: user.id }, function(err) {
       if (err) { console.error('Removing User error: ' + err); }
       else {
-        var text = "Boomtime! You've been unregistered!";
-        respond(text);
-        return;
+        respond(res, "Boomtime. You've been unregistered!");
       }
     });
   } else {
-    respond('To unregister, you need to register first!');
+    respond(res, 'To unregister, you need to register first!');
   }
 }
 
@@ -194,7 +191,7 @@ app.get('/todoist/:hash', function(req, res) {
       req.session.slack_id = token.slack_id;
       res.redirect('/auth');
     } else {
-      respond('Unable to find your registration token, please try again');
+      respond(res, 'Unable to find your registration token, please try again');
     }
   });
 });
@@ -211,7 +208,7 @@ app.get('/auth/callback',
 
 // Sadface :(
 app.get('/sadface', function(req, res) {
-  respond(':(');
+  respond(res, ':(');
 });
 
 // Happyface :)
@@ -227,9 +224,7 @@ if(debug_token) {
     .then(function(data){
       var projects = _.pluck(data.Projects, "name");
       console.log("projects: "+projects.join("\n"));
-    })
-  ;
-
+    });
 }
 
 var port = process.env.PORT || 8080;
