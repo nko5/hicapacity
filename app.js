@@ -56,7 +56,7 @@ passport.use('oauth2', new OAuth2Strategy({
 passport.use('slack', new SlackStrategy({
     clientID: process.env.CLIENT_ID_SLACK,
     clientSecret: process.env.CLIENT_SECRET_SLACK,
-    scope: 'commands',
+    scope: 'identify,commands',
     state: 'slacklemore'
   },
   function(accessToken, refreshToken, profile, done) {
@@ -370,11 +370,13 @@ app.get('/auth/todoist/callback',
       res.redirect('/happyface/todoist');
 });
 
+app.get('/auth/slack', passport.authenticate('slack'));
 app.get('/auth/slack/callback',
-  passport.authenticate('slack', { failureRedirect: '/sadface' }),
-  function(req, res) {
-    res.redirect('/happyface/slack');
-  });
+  passport.authenticate(
+    'slack', { failureRedirect: '/sadface' }),
+    function(req, res) {
+      res.redirect('/happyface/slack');
+});
 
 // Sadface :(
 app.get('/sadface', function(req, res) {
