@@ -11,6 +11,7 @@
 [ ] Return nicer annotated responses 
 [X] support parsing text and adding label ids
 [ ] Icon
-[ ] Configure Slack Button
+[ ] Configure Slack Button https://api.slack.com/docs/slack-button
+  [ ] OAuth for Slack https://github.com/mjpearson/passport-slack
 [ ] Deploy to Heroku
 [ ] add Fork Me On Github Ribbon https://codepo8.github.io/css-fork-on-github-ribbon/
