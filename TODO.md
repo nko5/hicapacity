@@ -11,17 +11,17 @@
 - [X] add Fork Me On Github Ribbon https://codepo8.github.io/css-fork-on-github-ribbon/
 - [X] Create Help page
 
-- [ ] Fill in copy (in progress)
+- [X] welcome message in slacktodoistdemo
+- [X] Fill in copy (in progress)
 - [ ] Configure Slack Button https://api.slack.com/docs/slack-button (in progress)
  - [ ] OAuth for Slack https://github.com/mjpearson/passport-slack (in progress)
 - [ ] Return nicer annotated responses (in progress)
 - [ ] Make a LICENSE
 - [ ] Cleanup repo and make public
-- [ ] make favicon.ico
+- [X] make favicon.ico
 - [ ] Fill help page copy
 - [ ] Add list of help command gifs to signup success happyfacehtml (and to help page above)
 - [ ] Side-by-side animated gify of slack window and todoist window showing workflow
 - [ ] GIF Slack.com: /todo @buy dad b-day gift
 - [ ] GIF Todoist.com: inbox item of 'buy dad b-day gift' animation poping in
-- [ ] Deploy to Heroku
 - [ ] Hookup email capture or take out
