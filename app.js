@@ -4,6 +4,7 @@ var crypto = require("crypto");
 var express = require('express');
 var passport = require('passport');
 var OAuth2Strategy= require('passport-oauth2').Strategy;
+var SlackStrategy= require('passport-slack').Strategy;
 var mongoose = require('mongoose');
 var User = require("./models/users.js");
 var RegistrationToken = require("./models/registration_tokens.js");
@@ -51,6 +52,19 @@ passport.use(new OAuth2Strategy({
     });
   }
 ));
+
+passport.use(new SlackStrategy({
+    clientID: process.env.CLIENT_ID_SLACK,
+    clientSecret: process.env.CLIENT_SECRET_SLACK
+  },
+  function(accessToken, refreshToken, profile, done) {
+    User.findOneAndUpdate({slack_id: profile.id}, {slack_oauth_token: accessToken}, { upsert: true, 'new': true}, function(err, user) {
+      if (err) { console.error('Finding / Updating User Slack error: ' + err); }
+      return done(err, user);
+    });
+  }
+));
+
 
 app.configure(function() {
   app.use(express.cookieParser());
@@ -298,7 +312,7 @@ app.post('/slash', function(req, res) {
     var command = req.body.text.split(" ")[0];
 
     // If user doesn't exist, hijack command to register
-    if(!user) {
+    if(!user || (user && user.todoist_oauth_token == null)) {
       command = "register";
     }
 
@@ -348,14 +362,26 @@ app.get('/auth/todoist/callback',
       res.redirect('/happyface/todoist');
 });
 
+app.get('/auth/slack', passport.authorize('slack'));
+app.get('/auth/slack/callback',
+  passport.authorize(
+    'slack', { failureRedirect: '/sadface' }),
+    function(req, res) {
+      res.redirect('/happyface/slack');
+    });
+
 // Sadface :(
 app.get('/sadface', function(req, res) {
   respond(res, 'Something bad happened. Robot overlords have been notified. :(');
 });
 
-// Happyface :)
+// Happyfaces :)
 app.get('/happyface/todoist', function(req, res) {
   res.sendfile(__dirname + '/public/happyface_todoist.html');
+});
+
+app.get('/happyface/slack', function(req, res) {
+  res.sendfile(__dirname + '/public/happyface_slack.html');
 });
 
 // Help, Yo
