@@ -367,7 +367,15 @@ app.get('/auth/todoist/callback',
 });
 
 app.get('/auth/slack/callback',
-  passport.authenticate('slack', { failureRedirect: '/sadface' }),
+  function(req, res, next) {
+    try {
+      passport.authenticate('slack', { failureRedirect: '/sadface' })(req, res, next);
+    }
+    catch (e)
+    {
+      console.error(e);
+    }
+  },
   function(req, res) {
     res.redirect('/happyface/slack');
   });
