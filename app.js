@@ -14,7 +14,6 @@ var _ = require("lodash");
 var Q = require("q");
 var URL = require("url");
 var https = require("https");
-
 var baseUrl = process.env.BASE_URL;
 
 // Connect to database
@@ -89,21 +88,9 @@ function respond(res, text) {
 }
 
 
-function richResponse(res, text) {
-  respond(res, {
-    text: text,
-    color: "#000000",
-    attachments: [
-      {
-        color: "#22FF44",
-        text: "wow, much attachment"
-      }]
-  });
-}
-
-
 function postJSON(url, json){
   var body = JSON.stringify(json);
+
   var options = URL.parse(url);
   options.method = "POST";
   options.headers = {
@@ -111,14 +98,18 @@ function postJSON(url, json){
     "Content-Length": Buffer.byteLength(body)
   };
 
-  var req = https.request(options, function(res) {
-    console.log(res.statusCode);
+  console.log(`postJSON(url=${url}, json=${body}, options=${JSON.stringify(options)})`);
+  var req = https.request(options, function(res, err){
+    console.log("postJSON: status="+res.statusCode+", url="+url);
     res.on('data', function(d) {
       process.stdout.write(d);
     });
   });
 
-  req.end(body);
+  req.write(body);
+  req.end(function(err, res) {
+    console.log("postJSON end url="+url);
+  });
 }
 
 
@@ -201,6 +192,7 @@ function filterItemsDueInLessThanNDays(items, ndays) {
 
 function buildItemsDueResponseJSON(items){
   var json = {
+    text:"",
     attachments: []
   };
   var text = [];
@@ -223,10 +215,15 @@ function buildItemsDueResponseJSON(items){
 
   json.text = text.join("\n");
 
-  // comment out to get attachments
-  json.attachments = null;
+  // disable rich attachments for now
+  // comment next-line to re-enable
+  delete json.attachments;
 
-  console.log("JSON="+JSON.stringify(json,2,2));
+  if(!json.text) {
+    json.text = `No items found. Good job!`;
+  }
+
+  console.log("Items JSON="+JSON.stringify(json,2,2));
 
   return json;
 
@@ -236,13 +233,9 @@ function buildItemsDueResponseJSON(items){
 function respondDueItems(token, response_url, ndays){
   Q.spawn(function* () {
     var json = yield todoist.getAll(token);
-
     var items = filterItemsDueInLessThanNDays(json.Items, ndays);
-
     var response_json = buildItemsDueResponseJSON(items);
-
     postJSON(response_url, response_json);
-
   });
 }
 
@@ -276,20 +269,20 @@ function respondListProjectItems(token, response_url, project){
 
 
 function handle_today(req, res, user) {
-  respond(res, "Due by Today");
+  respond(res, "Your Todoist items due today:");
   respondDueItems(user.todoist_oauth_token, req.body.response_url, 1);
 }
 
 
 function handle_week(req, res, user) {
-  respond(res, "Due in next week");
+  respond(res, "Your Todoist items due in the next week:");
   respondDueItems(user.todoist_oauth_token, req.body.response_url, 7);
 }
 
 
 function handle_list(req, res, user) {
   var project = req.body.text.substr("list ".length) || "Inbox";
-  respond(res, 'List items in '+project);
+  respond(res, `Your Todoist items in project ${project}:`);
   respondListProjectItems(user.todoist_oauth_token, req.body.response_url, project);
 }
 
@@ -303,15 +296,27 @@ function handle_labels(req, res, user) {
     .done();
 }
 
+function buildProjectsResponseText(projects){
+  var text = ['Your Todoist projects:'];
+  for(var i = 0; i < projects.length; ++i) {
+    var project = projects[i];
+    var link = `https://todoist.com/app?#project%2F${project.id}`;
+    text.push(`<${link}|${project.name}>`);
+  }
+  return text.join("\n");
+}
+
+
+
 function handle_projects(req, res, user) {
   todoist.getAll(user.todoist_oauth_token)
-    .then(function(data){
-      var projects = _.pluck(data.Projects, "name");
-      var text = projects.join("\n");
-      respond(res, text);
+    .then(function(data) {
+      var responseText = buildProjectsResponseText(data.Projects);
+      respond(res, responseText);
     })
     .done();
 }
+
 
 app.post('/slash', function(req, res) {
   User.findOne({ 'slack_id': req.body.user_id }, function (err, user) {
@@ -407,11 +412,12 @@ function* logall() {
 var debug_token = process.env.DEBUG_TODOIST_TOKEN;
 if(debug_token) {
   todoist.itemAdd(debug_token, "@DEBUG app started "+(new Date().toISOString()));
-  Q.spawn(logall);
+  //Q.spawn(logall);
+
 
   if(process.env.DEBUG_SLACK_RESPONSE_URL) {
     //respondDueItems(debug_token, process.env.DEBUG_SLACK_RESPONSE_URL, 7);
-    //respondListProjectItems(debug_token, process.env.DEBUG_SLACK_RESPONSE_URL, "Inbox");
+    respondListProjectItems(debug_token, process.env.DEBUG_SLACK_RESPONSE_URL, "Inbox");
   }
 }
 
